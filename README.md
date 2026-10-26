@@ -1,4 +1,4 @@
-# 🧠 PolyClay 7° — El Maestro de los Polinomios Aritméticos con Enteros ($\mathbb{Z}$)
+# 🧠 PolyClay 7° — El Maestro de los Polinomios Aritméticos con Números Enteros
 
 Aplicación web interactiva y gamificada diseñada especialmente para estudiantes de **Grado 7° de Educación Básica Secundaria**, desarrollada con una interfaz táctil moderna basada en **Claymorphism 3D** (estilo arcilla/plastilina suave y amigable para adolescentes).
 

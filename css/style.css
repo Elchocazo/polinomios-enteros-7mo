@@ -1,0 +1,1397 @@
+/* ==========================================================================
+   PolyClay 7° - Estilos Claymorphism & Diseño Gamificado
+   ========================================================================== */
+
+:root {
+  /* Paleta Clay Pastel Vibrante */
+  --bg-gradient-start: #EBF4FF;
+  --bg-gradient-end: #F4E8FD;
+  
+  --clay-card-bg: #FFFFFF;
+  --clay-card-secondary: #F8FAFC;
+  
+  --clay-purple: #7C3AED;
+  --clay-purple-light: #A78BFA;
+  --clay-purple-bg: #EDE9FE;
+  
+  --clay-blue: #2563EB;
+  --clay-blue-light: #60A5FA;
+  --clay-blue-bg: #DBEAFE;
+  
+  --clay-cyan: #0284C7;
+  --clay-emerald: #059669;
+  --clay-emerald-light: #34D399;
+  --clay-emerald-bg: #D1FAE5;
+  
+  --clay-amber: #D97706;
+  --clay-amber-light: #FBBF24;
+  --clay-amber-bg: #FEF3C7;
+  
+  --clay-rose: #E11D48;
+  --clay-rose-light: #FB7185;
+  --clay-rose-bg: #FFE4E6;
+  
+  --text-dark: #1E293B;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+  
+  /* Sombras y relieves Claymorphism 3D */
+  --clay-shadow-out: 8px 8px 18px rgba(130, 150, 190, 0.22), -8px -8px 18px rgba(255, 255, 255, 0.95);
+  --clay-shadow-out-sm: 4px 4px 10px rgba(130, 150, 190, 0.18), -4px -4px 10px rgba(255, 255, 255, 0.9);
+  --clay-shadow-out-lg: 12px 14px 28px rgba(120, 140, 180, 0.25), -10px -10px 24px rgba(255, 255, 255, 0.95);
+  
+  --clay-shadow-inset: inset 3px 3px 6px rgba(255, 255, 255, 0.9), inset -4px -4px 8px rgba(90, 110, 150, 0.12);
+  --clay-shadow-inset-deep: inset 4px 4px 8px rgba(90, 110, 150, 0.18), inset -4px -4px 8px rgba(255, 255, 255, 0.85);
+
+  --radius-sm: 14px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-full: 9999px;
+
+  /* Colores para niveles de jerarquía */
+  --bracket-paren: #D97706; /* Paréntesis dorado/naranja */
+  --bracket-paren-bg: #FEF3C7;
+  --bracket-square: #2563EB; /* Corchete azul */
+  --bracket-square-bg: #DBEAFE;
+  --bracket-curly: #7C3AED; /* Llave morada */
+  --bracket-curly-bg: #EDE9FE;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+body {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  color: var(--text-dark);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  padding-bottom: 2rem;
+}
+
+/* Formas orgánicas flotantes estilo arcilla */
+.clay-bg-blobs {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(50px);
+  opacity: 0.45;
+  animation: floatBlobs 18s ease-in-out infinite alternate;
+}
+
+.blob-1 {
+  width: 380px;
+  height: 380px;
+  background: #A78BFA;
+  top: -100px;
+  left: -80px;
+}
+
+.blob-2 {
+  width: 420px;
+  height: 420px;
+  background: #60A5FA;
+  bottom: -100px;
+  right: -80px;
+  animation-duration: 22s;
+  animation-delay: -4s;
+}
+
+.blob-3 {
+  width: 320px;
+  height: 320px;
+  background: #34D399;
+  top: 40%;
+  left: 60%;
+  animation-duration: 26s;
+  animation-delay: -8s;
+}
+
+.blob-4 {
+  width: 250px;
+  height: 250px;
+  background: #FBBF24;
+  bottom: 20%;
+  left: 10%;
+  animation-duration: 20s;
+}
+
+@keyframes floatBlobs {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, 30px) scale(1.08); }
+  100% { transform: translate(-30px, 50px) scale(0.95); }
+}
+
+/* Canvas de Confetti */
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Contenedor Principal */
+.app-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Header Claymorphism */
+.clay-header {
+  background: var(--clay-card-bg);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-shadow: var(--clay-shadow-out), var(--clay-shadow-inset);
+  border: 3px solid rgba(255, 255, 255, 0.8);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.brand-avatar {
+  width: 54px;
+  height: 54px;
+  background: linear-gradient(135deg, #7C3AED, #A78BFA);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  box-shadow: 4px 4px 10px rgba(124, 58, 237, 0.35), inset 2px 2px 4px rgba(255, 255, 255, 0.6);
+  border: 2px solid #C4B5FD;
+}
+
+.brand-title {
+  font-family: 'Fredoka', cursive;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--clay-purple);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.brand-subtitle {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.stats-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.stat-clay-card {
+  background: #F8FAFC;
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--clay-shadow-out-sm), var(--clay-shadow-inset);
+  border: 2px solid #FFFFFF;
+}
+
+.stat-emoji {
+  font-size: 1.3rem;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-val {
+  font-family: 'Fredoka', cursive;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1;
+}
+
+.stat-lbl {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.4px;
+}
+
+/* Botones con estilo Claymorphism */
+.clay-btn {
+  font-family: 'Fredoka', cursive;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-decoration: none;
+  outline: none;
+}
+
+.clay-btn:active {
+  transform: translateY(3px) scale(0.97);
+}
+
+.clay-btn-amber {
+  background: linear-gradient(135deg, #FBBF24, #D97706);
+  color: #FFFFFF;
+  box-shadow: 4px 4px 12px rgba(217, 119, 6, 0.35), inset 2px 2px 4px rgba(255, 255, 255, 0.6), inset -2px -2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid #FDE68A;
+}
+
+.clay-btn-emerald {
+  background: linear-gradient(135deg, #34D399, #059669);
+  color: #FFFFFF;
+  box-shadow: 4px 4px 12px rgba(5, 150, 105, 0.35), inset 2px 2px 4px rgba(255, 255, 255, 0.6), inset -2px -2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid #A7F3D0;
+}
+
+.clay-btn-indigo {
+  background: linear-gradient(135deg, #818CF8, #4F46E5);
+  color: #FFFFFF;
+  box-shadow: 4px 4px 12px rgba(79, 70, 229, 0.35), inset 2px 2px 4px rgba(255, 255, 255, 0.6), inset -2px -2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid #C7D2FE;
+}
+
+.clay-btn-outline {
+  background: #FFFFFF;
+  color: var(--text-dark);
+  box-shadow: var(--clay-shadow-out-sm), var(--clay-shadow-inset);
+  border: 2px solid #E2E8F0;
+}
+
+.clay-btn-outline:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+.clay-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: #FFFFFF;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--clay-shadow-out-sm), var(--clay-shadow-inset);
+  border: 2px solid #FFFFFF;
+  transition: transform 0.15s ease;
+}
+
+.clay-icon-btn:active {
+  transform: translateY(2px) scale(0.95);
+}
+
+/* Barra de Niveles */
+.levels-nav {
+  background: var(--clay-card-bg);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--clay-shadow-out-sm), var(--clay-shadow-inset);
+  border: 2px solid #FFFFFF;
+  overflow-x: auto;
+}
+
+.nav-title-box {
+  flex-shrink: 0;
+}
+
+.nav-pill-label {
+  font-family: 'Fredoka', cursive;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--clay-purple);
+  background: var(--clay-purple-bg);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+}
+
+.levels-scroll {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding: 0.2rem 0.1rem;
+  scrollbar-width: thin;
+}
+
+.level-chip {
+  font-family: 'Fredoka', cursive;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-md);
+  background: #F1F5F9;
+  color: var(--text-muted);
+  border: 2px solid #E2E8F0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.level-chip:hover {
+  background: #E2E8F0;
+  transform: translateY(-1px);
+}
+
+.level-chip.active {
+  background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+  color: #FFFFFF;
+  border-color: #C4B5FD;
+  box-shadow: 3px 3px 8px rgba(109, 40, 217, 0.3), inset 2px 2px 4px rgba(255, 255, 255, 0.4);
+}
+
+/* Card base Clay */
+.clay-card {
+  background: var(--clay-card-bg);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--clay-shadow-out), var(--clay-shadow-inset);
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  position: relative;
+}
+
+/* Banner de Instrucción / Guía Pedagógica */
+.guide-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F5F3FF 100%);
+  border-left: 8px solid var(--clay-purple);
+  padding: 1.15rem 1.4rem;
+}
+
+.guide-avatar-bubble {
+  width: 58px;
+  height: 58px;
+  background: linear-gradient(135deg, #C4B5FD, #8B5CF6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.9rem;
+  flex-shrink: 0;
+  box-shadow: 4px 4px 10px rgba(139, 92, 246, 0.3), inset 2px 2px 4px rgba(255, 255, 255, 0.7);
+  animation: pulseClay 3s infinite alternate ease-in-out;
+}
+
+@keyframes pulseClay {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.06); }
+}
+
+.guide-text-content {
+  flex: 1;
+}
+
+.guide-tag {
+  font-family: 'Fredoka', cursive;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--clay-purple);
+  background: var(--clay-purple-bg);
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  margin-bottom: 0.35rem;
+}
+
+.guide-instruction {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1.35;
+}
+
+/* Escenario de la Expresión Matemática */
+.expression-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  background: #FFFFFF;
+}
+
+.stage-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.level-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Fredoka', cursive;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--clay-purple);
+}
+
+.badge-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--clay-emerald);
+  box-shadow: 0 0 8px rgba(5, 150, 105, 0.6);
+}
+
+.progress-bar-container {
+  min-width: 180px;
+  height: 24px;
+  background: #E2E8F0;
+  border-radius: var(--radius-full);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--clay-shadow-inset-deep);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34D399, #10B981);
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease-out;
+  box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.6);
+}
+
+.progress-bar-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+/* Visualización interactiva de la Expresión */
+.math-display-wrapper {
+  background: linear-gradient(135deg, #F8FAFC, #F1F5F9);
+  border-radius: var(--radius-md);
+  padding: 1.75rem 1.25rem;
+  box-shadow: var(--clay-shadow-inset-deep);
+  border: 2px solid #E2E8F0;
+  min-height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: auto;
+}
+
+.math-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  font-family: 'Fredoka', cursive;
+  font-size: 2.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Tokens de la expresión con Claymorphism */
+.math-token {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.45rem;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.token-op {
+  color: #64748B;
+  font-weight: 700;
+}
+
+.token-num {
+  color: #0F172A;
+  font-weight: 700;
+}
+
+/* Signos de agrupación con colores y relieve */
+.token-bracket {
+  font-weight: 700;
+  font-size: 2.3rem;
+  line-height: 1;
+}
+
+.token-bracket.paren {
+  color: var(--bracket-paren);
+}
+
+.token-bracket.square {
+  color: var(--bracket-square);
+}
+
+.token-bracket.curly {
+  color: var(--bracket-curly);
+}
+
+/* Bloque interactivo activo (el que se debe resolver ahora) */
+.subexpr-block {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-md);
+  background: #FFFFFF;
+  box-shadow: var(--clay-shadow-out-sm), var(--clay-shadow-inset);
+  border: 2px solid transparent;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+}
+
+.subexpr-block:hover {
+  transform: scale(1.05);
+}
+
+.subexpr-block.target-active {
+  background: #FEF3C7;
+  border-color: #F59E0B;
+  animation: glowTarget 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes glowTarget {
+  0% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.3), var(--clay-shadow-inset); transform: scale(1.02); }
+  100% { box-shadow: 0 0 22px rgba(245, 158, 11, 0.65), var(--clay-shadow-inset); transform: scale(1.05); }
+}
+
+/* Mini píldora de jerarquía */
+.hierarchy-mini-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.45rem 1rem;
+  background: #F8FAFC;
+  border-radius: var(--radius-full);
+  align-self: center;
+  border: 2px solid #E2E8F0;
+  flex-wrap: wrap;
+}
+
+.mini-rule-item {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full);
+  transition: all 0.2s ease;
+}
+
+.mini-rule-item.active {
+  background: #FEF3C7;
+  color: #B45309;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.2);
+}
+
+.rule-arrow {
+  font-size: 0.75rem;
+  color: #CBD5E1;
+}
+
+/* ==========================================================================
+   Área de Interacción del Estudiante
+   ========================================================================== */
+
+.interaction-card {
+  background: #FFFFFF;
+}
+
+.interaction-phase {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.interaction-phase.hidden {
+  display: none !important;
+}
+
+.phase-title {
+  font-family: 'Fredoka', cursive;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--clay-purple);
+  text-align: center;
+}
+
+.phase-desc {
+  font-size: 1rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Opciones de la Fase 1 (Identificar por dónde empezar) */
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.option-clay-btn {
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1rem;
+  font-family: 'Fredoka', cursive;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  border: 3px solid #E2E8F0;
+  box-shadow: var(--clay-shadow-out), var(--clay-shadow-inset);
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.option-clay-btn:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: #A78BFA;
+  box-shadow: var(--clay-shadow-out-lg), var(--clay-shadow-inset);
+}
+
+.option-clay-btn:active {
+  transform: translateY(2px) scale(0.98);
+}
+
+.option-clay-btn .option-tag {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--clay-purple);
+  background: var(--clay-purple-bg);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+}
+
+/* Fase 2: Resolver la Matemática */
+.solve-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.target-subexpr-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: #FEF3C7;
+  border: 3px solid #F59E0B;
+  padding: 0.6rem 1.4rem;
+  border-radius: var(--radius-full);
+  box-shadow: 4px 4px 12px rgba(245, 158, 11, 0.25), var(--clay-shadow-inset);
+}
+
+.target-label {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #92400E;
+}
+
+.target-expr {
+  font-family: 'Fredoka', cursive;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #78350F;
+}
+
+.pedagogical-tip {
+  background: #F0FDF4;
+  border: 2px dashed #34D399;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  color: #065F46;
+  text-align: center;
+  max-width: 650px;
+}
+
+.student-input-arena {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.input-display-clay {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: #F8FAFC;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--clay-shadow-inset-deep);
+  border: 2px solid #E2E8F0;
+}
+
+.prompt-symbol {
+  font-family: 'Fredoka', cursive;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.interactive-result-box {
+  min-width: 130px;
+  height: 58px;
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka', cursive;
+  font-size: 2rem;
+  font-weight: 700;
+  padding: 0 1rem;
+  box-shadow: var(--clay-shadow-out-sm), var(--clay-shadow-inset);
+  border: 2px solid #CBD5E1;
+  gap: 0.2rem;
+}
+
+.interactive-result-box .res-sign {
+  color: var(--clay-purple);
+}
+
+.interactive-result-box .res-num {
+  color: var(--text-dark);
+}
+
+/* Teclado en Pantalla Claymorphism */
+.clay-keypad {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-width: 480px;
+  width: 100%;
+}
+
+.keypad-row {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: center;
+}
+
+.key-btn {
+  font-family: 'Fredoka', cursive;
+  font-size: 1.35rem;
+  font-weight: 700;
+  height: 54px;
+  flex: 1;
+  min-width: 50px;
+  border-radius: var(--radius-md);
+  border: 2px solid #FFFFFF;
+  background: #FFFFFF;
+  color: var(--text-dark);
+  cursor: pointer;
+  box-shadow: var(--clay-shadow-out-sm), var(--clay-shadow-inset);
+  transition: all 0.12s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.key-btn:active {
+  transform: translateY(3px) scale(0.96);
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1), inset 3px 3px 6px rgba(0,0,0,0.1);
+}
+
+.key-btn.key-sign {
+  background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
+  color: var(--clay-blue);
+  border-color: #C7D2FE;
+  font-size: 1.6rem;
+}
+
+.key-btn.key-action {
+  background: #F1F5F9;
+  color: var(--text-muted);
+}
+
+.key-btn.key-submit {
+  flex: 2;
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #FFFFFF;
+  border-color: #6EE7B7;
+  box-shadow: 4px 4px 12px rgba(16, 185, 129, 0.4), inset 2px 2px 4px rgba(255, 255, 255, 0.6);
+  font-size: 1.15rem;
+}
+
+/* Fase 3: Regla de Signos / Doble signo */
+.sign-rule-arena {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.sign-transform-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #F8FAFC;
+  padding: 1rem 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--clay-shadow-inset-deep);
+  border: 2px solid #E2E8F0;
+  font-family: 'Fredoka', cursive;
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.old-signs {
+  color: var(--clay-rose);
+}
+
+.transform-arrow {
+  color: var(--text-muted);
+}
+
+.new-sign-placeholder {
+  color: var(--clay-purple);
+  border-bottom: 3px dashed var(--clay-purple);
+  padding: 0 0.5rem;
+}
+
+.sign-options-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.clay-btn-sign {
+  font-size: 1.1rem;
+  padding: 0.9rem 1.8rem;
+  border-radius: var(--radius-lg);
+  background: #FFFFFF;
+  box-shadow: var(--clay-shadow-out), var(--clay-shadow-inset);
+  border: 3px solid #E2E8F0;
+}
+
+.clay-btn-sign[data-sign="+"] {
+  color: var(--clay-emerald);
+}
+
+.clay-btn-sign[data-sign="+"]:hover {
+  border-color: #34D399;
+  background: #ECFDF5;
+}
+
+.clay-btn-sign[data-sign="-"] {
+  color: var(--clay-rose);
+}
+
+.clay-btn-sign[data-sign="-"]:hover {
+  border-color: #FB7185;
+  background: #FFF1F2;
+}
+
+/* Banner de Feedback Interactivo */
+.feedback-banner {
+  margin-top: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: #ECFDF5;
+  border: 3px solid #6EE7B7;
+  box-shadow: var(--clay-shadow-out-sm);
+  animation: slideInUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-banner.error {
+  background: #FFF1F2;
+  border-color: #FDA4AF;
+}
+
+.feedback-banner.hidden {
+  display: none !important;
+}
+
+.feedback-icon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+}
+
+.feedback-text-wrap {
+  flex: 1;
+}
+
+.feedback-heading {
+  font-family: 'Fredoka', cursive;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #065F46;
+}
+
+.feedback-banner.error .feedback-heading {
+  color: #9F1239;
+}
+
+.feedback-detail {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #047857;
+  margin-top: 0.2rem;
+}
+
+.feedback-banner.error .feedback-detail {
+  color: #BE123C;
+}
+
+/* Historial de Pasos (Demostración didáctica) */
+.steps-history-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: #FFFFFF;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #F1F5F9;
+  padding-bottom: 0.75rem;
+}
+
+.history-header h3 {
+  font-family: 'Fredoka', cursive;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.history-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--clay-blue);
+  background: var(--clay-blue-bg);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+}
+
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  font-family: 'Fredoka', cursive;
+  font-size: 1.1rem;
+  animation: fadeInStep 0.3s ease;
+}
+
+@keyframes fadeInStep {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.step-number-bubble {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--clay-purple);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-math {
+  flex: 1;
+  color: var(--text-dark);
+}
+
+.step-note {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: #E2E8F0;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+}
+
+/* Footer */
+.clay-footer {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.footer-tools {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-note {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ==========================================================================
+   Modales (Reglas y Personalizador de Polinomios)
+   ========================================================================== */
+
+.clay-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  animation: fadeInModal 0.2s ease-out;
+}
+
+.clay-modal-overlay.hidden {
+  display: none !important;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.clay-modal {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  max-width: 650px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--clay-shadow-out-lg), var(--clay-shadow-inset);
+  border: 4px solid #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  animation: popModal 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popModal {
+  from { transform: scale(0.92); }
+  to { transform: scale(1); }
+}
+
+.modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 2px solid #F1F5F9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  font-family: 'Fredoka', cursive;
+  font-size: 1.45rem;
+  color: var(--clay-purple);
+}
+
+.close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #F1F5F9;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.close-btn:hover {
+  background: #E2E8F0;
+  color: var(--text-dark);
+}
+
+.modal-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.clay-rule-block {
+  display: flex;
+  gap: 1rem;
+  background: #F8FAFC;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--clay-shadow-out-sm), var(--clay-shadow-inset);
+  border: 2px solid #FFFFFF;
+}
+
+.rule-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.rule-content h3 {
+  font-family: 'Fredoka', cursive;
+  font-size: 1.15rem;
+  color: var(--text-dark);
+  margin-bottom: 0.4rem;
+}
+
+.rule-content p, .rule-content ul, .rule-content ol {
+  font-size: 0.95rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.rule-nested-list {
+  margin-left: 1.25rem;
+  margin-top: 0.4rem;
+}
+
+.rule-content ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.signs-table {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+}
+
+.sign-badge {
+  font-family: 'Fredoka', cursive;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+}
+
+.sign-badge.positive {
+  background: #ECFDF5;
+  color: #065F46;
+  border: 2px solid #A7F3D0;
+}
+
+.sign-badge.negative {
+  background: #FFF1F2;
+  color: #9F1239;
+  border: 2px solid #FECDD3;
+}
+
+.rule-subtext {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 2px solid #F1F5F9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* Estilos de personalización de polinomio */
+.custom-input-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.clay-text-input {
+  width: 100%;
+  padding: 0.85rem 1.1rem;
+  font-family: 'Fredoka', cursive;
+  font-size: 1.25rem;
+  border-radius: var(--radius-md);
+  border: 2px solid #CBD5E1;
+  background: #F8FAFC;
+  box-shadow: var(--clay-shadow-inset-deep);
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.clay-text-input:focus {
+  border-color: var(--clay-purple);
+  background: #FFFFFF;
+}
+
+.presets-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.presets-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.presets-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.clay-chip {
+  text-align: left;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  font-family: 'Fredoka', cursive;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.clay-chip:hover {
+  background: #E2E8F0;
+  border-color: #94A3B8;
+}
+
+.clay-alert-error {
+  padding: 0.75rem 1rem;
+  background: #FFF1F2;
+  color: #9F1239;
+  border: 2px solid #FDA4AF;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.clay-alert-error.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   Responsive Adaptability (Pizarras interactivas, Tablets, Smartphones)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .app-container {
+    padding: 0.75rem 0.5rem;
+    gap: 0.85rem;
+  }
+
+  .clay-header {
+    padding: 0.85rem 1rem;
+  }
+
+  .brand-title {
+    font-size: 1.4rem;
+  }
+
+  .math-display {
+    font-size: 1.5rem;
+  }
+
+  .token-bracket {
+    font-size: 1.7rem;
+  }
+
+  .key-btn {
+    height: 48px;
+    font-size: 1.2rem;
+  }
+
+  .target-expr {
+    font-size: 1.3rem;
+  }
+}

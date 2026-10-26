@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolyClay: El Maestro de los Polinomios Aritméticos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Fondo con formas orgánicas flotantes estilo clay -->
+  <div class="clay-bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Barra superior / Header gamificado -->
+    <header class="clay-header">
+      <div class="brand">
+        <div class="brand-avatar clay-badge">
+          <span class="avatar-icon">🧠</span>
+        </div>
+        <div>
+          <h1 class="brand-title">PolyClay 7°</h1>
+          <p class="brand-subtitle">Polinomios con Números Enteros</p>
+        </div>
+      </div>
+
+      <div class="stats-panel">
+        <div class="stat-clay-card" title="Racha de aciertos seguidos">
+          <span class="stat-emoji">🔥</span>
+          <div class="stat-info">
+            <span class="stat-val" id="streak-count">0</span>
+            <span class="stat-lbl">Racha</span>
+          </div>
+        </div>
+
+        <div class="stat-clay-card" title="Puntos acumulados">
+          <span class="stat-emoji">⭐</span>
+          <div class="stat-info">
+            <span class="stat-val" id="score-count">0</span>
+            <span class="stat-lbl">Puntos</span>
+          </div>
+        </div>
+
+        <div class="stat-clay-card" title="Vidas para el reto">
+          <span class="stat-emoji">❤️</span>
+          <div class="stat-info">
+            <span class="stat-val" id="hearts-count">3</span>
+            <span class="stat-lbl">Vidas</span>
+          </div>
+        </div>
+
+        <button id="btn-sound-toggle" class="clay-icon-btn" title="Activar/Silenciar sonido" aria-label="Sonido">
+          🔊
+        </button>
+
+        <button id="btn-help-modal" class="clay-btn clay-btn-amber" title="Guía rápida de reglas">
+          📖 Reglas de Oro
+        </button>
+      </div>
+    </header>
+
+    <!-- Barra de selección de Niveles y Modos -->
+    <nav class="levels-nav">
+      <div class="nav-title-box">
+        <span class="nav-pill-label">MISIÓN ACTUAL:</span>
+      </div>
+      <div class="levels-scroll" id="levels-container">
+        <!-- Los botones de nivel se renderizan dinámicamente -->
+      </div>
+    </nav>
+
+    <!-- Tablero principal de juego -->
+    <main class="game-main-board">
+      
+      <!-- Banner de estado / Instrucción pedagógica -->
+      <section class="clay-card guide-banner" id="guide-banner">
+        <div class="guide-avatar-bubble">
+          <div class="bot-icon">🤖</div>
+        </div>
+        <div class="guide-text-content">
+          <span class="guide-tag" id="guide-step-tag">PASO 1: ¿POR DÓNDE EMPEZAR?</span>
+          <h2 class="guide-instruction" id="guide-instruction-text">
+            ¡Observa la expresión completa! Recuerda: resolvemos de adentro hacia afuera empezando por los paréntesis.
+          </h2>
+        </div>
+      </section>
+
+      <!-- Pizarra central de la expresión matemática -->
+      <section class="clay-card expression-stage">
+        <div class="stage-topbar">
+          <div class="level-indicator">
+            <span class="badge-dot"></span>
+            <span id="current-level-name">Nivel 1: El Reino de los Paréntesis</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="exercise-progress" style="width: 20%;"></div>
+            <span class="progress-bar-text" id="exercise-counter">Ejercicio 1 de 5</span>
+          </div>
+        </div>
+
+        <!-- Renderizado interactivo de la expresión -->
+        <div class="math-display-wrapper">
+          <div class="math-display" id="math-expression-display">
+            <!-- Tokens interactivos generados por JS -->
+          </div>
+        </div>
+
+        <!-- Pista visual de la jerarquía de signos -->
+        <div class="hierarchy-mini-pill">
+          <span class="mini-rule-item active" id="rule-pill-paren">1° Paréntesis ( )</span>
+          <span class="rule-arrow">➜</span>
+          <span class="mini-rule-item" id="rule-pill-bracket">2° Corchetes [ ]</span>
+          <span class="rule-arrow">➜</span>
+          <span class="mini-rule-item" id="rule-pill-brace">3° Llaves { }</span>
+        </div>
+      </section>
+
+      <!-- Área de Interacción y Resolución del Estudiante -->
+      <section class="clay-card interaction-card" id="interaction-zone">
+        
+        <!-- Fase 1: Identificar por dónde empezar (Jerarquía) -->
+        <div class="interaction-phase" id="phase-identify">
+          <h3 class="phase-title">🎯 ¿Cuál bloque debemos resolver primero?</h3>
+          <p class="phase-desc">Toca en la expresión el bloque correcto o elige una de las opciones:</p>
+          <div class="options-grid" id="identify-options-grid">
+            <!-- Opciones generadas por JS -->
+          </div>
+        </div>
+
+        <!-- Fase 2: Resolver la operación matemática interna -->
+        <div class="interaction-phase hidden" id="phase-solve">
+          <div class="solve-header">
+            <div class="target-subexpr-badge">
+              <span class="target-label">Operación a resolver:</span>
+              <span class="target-expr" id="target-subexpr-text">( -7 + 12 )</span>
+            </div>
+            <div class="pedagogical-tip" id="pedagogical-hint-box">
+              💡 <strong>Regla:</strong> Signos diferentes se restan y manda el signo del número con mayor valor absoluto.
+            </div>
+          </div>
+
+          <div class="student-input-arena">
+            <div class="input-display-clay">
+              <span class="prompt-symbol">Resultado =</span>
+              <div class="interactive-result-box" id="student-result-preview">
+                <span class="res-sign" id="preview-sign"></span>
+                <span class="res-num" id="preview-num">?</span>
+              </div>
+            </div>
+
+            <!-- Teclado en pantalla táctil con Claymorfismo -->
+            <div class="clay-keypad">
+              <div class="keypad-row">
+                <button class="key-btn key-sign" data-action="set-sign" data-val="+">+</button>
+                <button class="key-btn key-sign" data-action="set-sign" data-val="-">-</button>
+                <button class="key-btn key-num" data-action="num" data-val="1">1</button>
+                <button class="key-btn key-num" data-action="num" data-val="2">2</button>
+                <button class="key-btn key-num" data-action="num" data-val="3">3</button>
+              </div>
+              <div class="keypad-row">
+                <button class="key-btn key-num" data-action="num" data-val="4">4</button>
+                <button class="key-btn key-num" data-action="num" data-val="5">5</button>
+                <button class="key-btn key-num" data-action="num" data-val="6">6</button>
+                <button class="key-btn key-num" data-action="num" data-val="7">7</button>
+                <button class="key-btn key-num" data-action="num" data-val="8">8</button>
+              </div>
+              <div class="keypad-row">
+                <button class="key-btn key-num" data-action="num" data-val="9">9</button>
+                <button class="key-btn key-num" data-action="num" data-val="0">0</button>
+                <button class="key-btn key-action key-backspace" data-action="backspace" title="Borrar">⌫</button>
+                <button class="key-btn key-action key-clear" data-action="clear" title="Limpiar">C</button>
+                <button class="key-btn key-submit" id="btn-submit-answer" data-action="submit">¡Comprobar! ✓</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fase 3: Supresión de signos / Doble signo -->
+        <div class="interaction-phase hidden" id="phase-sign-rule">
+          <h3 class="phase-title">⚡ Ley de Signos / Supresión de Signo de Agrupación</h3>
+          <div class="sign-rule-arena">
+            <div class="sign-transform-box">
+              <span class="old-signs" id="sign-transform-before">- ( +5 )</span>
+              <span class="transform-arrow">➔</span>
+              <span class="new-sign-placeholder" id="sign-transform-after">? 5</span>
+            </div>
+            <p class="phase-desc" id="sign-rule-question">¿Qué signo resulta al multiplicar o suprimir los signos?</p>
+            <div class="sign-options-row">
+              <button class="clay-btn clay-btn-sign" data-sign="+">Signo Positivo (+)</button>
+              <button class="clay-btn clay-btn-sign" data-sign="-">Signo Negativo (-)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensaje de Feedback interactivo -->
+        <div class="feedback-banner hidden" id="feedback-message">
+          <div class="feedback-icon" id="feedback-icon">🎉</div>
+          <div class="feedback-text-wrap">
+            <h4 class="feedback-heading" id="feedback-heading">¡Excelente trabajo!</h4>
+            <p class="feedback-detail" id="feedback-detail">Has aplicado correctamente la regla de signos.</p>
+          </div>
+          <button class="clay-btn clay-btn-emerald" id="btn-next-step">Continuar ➔</button>
+        </div>
+
+      </section>
+
+      <!-- Historial de pasos completados (Demostración didáctica) -->
+      <section class="clay-card steps-history-card">
+        <div class="history-header">
+          <h3>📝 Historial del desarrollo paso a paso:</h3>
+          <span class="history-badge">Demostración formal</span>
+        </div>
+        <div class="steps-list" id="steps-history-list">
+          <!-- Pasos se agregan aquí dinámicamente -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer con herramientas para el docente -->
+    <footer class="clay-footer">
+      <div class="footer-tools">
+        <button id="btn-custom-exercise" class="clay-btn clay-btn-outline">
+          ✏️ Crear / Escribir mi propio polinomio
+        </button>
+        <button id="btn-random-exercise" class="clay-btn clay-btn-outline">
+          🎲 Generar otro ejercicio al azar
+        </button>
+        <button id="btn-reset-current" class="clay-btn clay-btn-outline">
+          🔄 Reiniciar este ejercicio
+        </button>
+      </div>
+      <p class="footer-note">
+        Herramienta didáctica para 7° Grado • Aritmética de Enteros $\mathbb{Z}$ • Diseñado con estilo Claymorphism 3D
+      </p>
+    </footer>
+  </div>
+
+  <!-- MODAL: Reglas de Oro (Ayuda Pedagógica) -->
+  <div class="clay-modal-overlay hidden" id="modal-rules">
+    <div class="clay-modal">
+      <div class="modal-header">
+        <h2>📚 Guía Rápida: Polinomios con Enteros</h2>
+        <button class="close-btn" id="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="clay-rule-block">
+          <div class="rule-icon">1️⃣</div>
+          <div class="rule-content">
+            <h3>Jerarquía de Signos de Agrupación</h3>
+            <p>Se resuelven <strong>siempre de adentro hacia afuera</strong>:</p>
+            <ol class="rule-nested-list">
+              <li><strong>Paréntesis ( )</strong> : Los más internos primero.</li>
+              <li><strong>Corchetes [ ]</strong> : Los intermedios que los contienen.</li>
+              <li><strong>Llaves { }</strong> : El conjunto exterior final.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="clay-rule-block">
+          <div class="rule-icon">2️⃣</div>
+          <div class="rule-content">
+            <h3>Suma y Resta de Números Enteros ($\mathbb{Z}$)</h3>
+            <ul>
+              <li><strong>Signos Iguales:</strong> Se <em>suman</em> sus valores absolutos y se deja el <em>mismo signo</em>.<br>
+                <code>(+5) + (+3) = +8</code> &nbsp;|&nbsp; <code>(-4) + (-6) = -10</code>
+              </li>
+              <li><strong>Signos Contrarios:</strong> Se <em>restan</em> los valores (mayor menos menor) y se coloca el <em>signo del que tiene mayor valor absoluto</em>.<br>
+                <code>-9 + 4 = -5</code> (porque 9 es mayor que 4, gana el negativo)<br>
+                <code>-3 + 10 = +7</code> (porque 10 es mayor que 3, gana el positivo)
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="clay-rule-block">
+          <div class="rule-icon">3️⃣</div>
+          <div class="rule-content">
+            <h3>Ley de Signos (Multiplicación y Supresión)</h3>
+            <div class="signs-table">
+              <span class="sign-badge positive">(+) · (+) = +</span>
+              <span class="sign-badge positive">(-) · (-) = +</span>
+              <span class="sign-badge negative">(+) · (-) = -</span>
+              <span class="sign-badge negative">(-) · (+) = -</span>
+            </div>
+            <p class="rule-subtext">
+              <strong>Tip rápido de supresión:</strong> Si hay un <code>+</code> antes del paréntesis, no cambia nada. Si hay un <code>-</code> antes del paréntesis, <em>¡invierte todos los signos de adentro!</em>
+            </p>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="clay-btn clay-btn-emerald" id="btn-close-modal-2">¡Entendido! Vamos a jugar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Crear propio polinomio personalizado (Para el Docente) -->
+  <div class="clay-modal-overlay hidden" id="modal-custom-exercise">
+    <div class="clay-modal">
+      <div class="modal-header">
+        <h2>✏️ Crear Ejercicio Personalizado</h2>
+        <button class="close-btn" id="btn-close-custom-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Escribe cualquier polinomio aritmético con enteros usando paréntesis <code>( )</code>, corchetes <code>[ ]</code> y/o llaves <code>{ }</code>:</p>
+        
+        <div class="custom-input-box">
+          <label for="custom-poly-input">Polinomio aritmético:</label>
+          <input type="text" id="custom-poly-input" class="clay-text-input" placeholder="Ej: 15 - { -3 + [ 8 - (-4 + 6) ] - 2 }" value="15 - { -3 + [ 8 - (-4 + 6) ] - 2 }">
+        </div>
+
+        <div class="presets-container">
+          <p class="presets-label">O elige uno de estos ejemplos recomendados para 7°:</p>
+          <div class="presets-buttons">
+            <button class="clay-chip" data-example="8 - (-5 + 12)">Básico: 8 - (-5 + 12)</button>
+            <button class="clay-chip" data-example="-10 + [ 4 - (-6 + 2) + 3 ]">Intermedio: -10 + [ 4 - (-6 + 2) + 3 ]</button>
+            <button class="clay-chip" data-example="5 - { -2 + [ 7 - (-3 - 5) + 1 ] - 4 }">Completo: 5 - { -2 + [ 7 - (-3 - 5) + 1 ] - 4 }</button>
+            <button class="clay-chip" data-example="-{ 8 - [ 14 - (-5 + 9) ] + (-6) }">Desafío: -{ 8 - [ 14 - (-5 + 9) ] + (-6) }</button>
+          </div>
+        </div>
+
+        <div id="custom-error-msg" class="clay-alert-error hidden">
+          La expresión tiene paréntesis o corchetes desbalanceados. Por favor revísala.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="clay-btn clay-btn-outline" id="btn-cancel-custom">Cancelar</button>
+        <button class="clay-btn clay-btn-indigo" id="btn-load-custom">Cargar y Empezar Ejercicio 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor para Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Scripts -->
+  <script src="js/audio.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

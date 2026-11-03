@@ -55,3 +55,24 @@ La aplicación cubre integralmente el currículo de aritmética de enteros para 
 - **Generador Aleatorio Infinito:** Crea ejercicios nuevos al instante para práctica ilimitada.
 - **Creador de Ejercicios Personalizados:** Permite al profesor escribir cualquier polinomio aritmético en la pizarra digital de clase con validación automática de signos de agrupación.
 - **Guía Rápida "Reglas de Oro":** Modal accesible con un clic con el resumen de conceptos clave.
+
+---
+
+## 📝 Modo Examen Oficial y Tabla de Ranking
+
+- **10 Preguntas Secuenciales:** Cada intento contiene 10 problemas ordenados por dificultad y jerarquía pedagógica.
+- **Escala de Calificación de 1.0 a 5.0:**
+  - $\text{Nota} = 1.0 + \left(\frac{\text{Aciertos}}{10}\right) \times 4.0$
+  - 10 aciertos = 5.0 (Desempeño Superior 🌟)
+  - 8 aciertos = 4.2 (Desempeño Alto 👏)
+  - 6 aciertos = 3.4 (Desempeño Básico 👍)
+  - Menos de 5 aciertos = Desempeño Bajo ⚠️ (Aprobación mínima: 3.0)
+- **3 Oportunidades para Mejorar:**
+  - El estudiante registra su nombre completo.
+  - Puede presentar hasta 3 intentos oficiales; las preguntas varían entre oportunidades para evitar memorización.
+  - La calificación que se guarda en el Ranking oficial es siempre **la mejor nota alcanzada**.
+- **Tabla de Ranking en Vivo:**
+  - Medallas (🥇 1°, 🥈 2°, 🥉 3°) y clasificación por mejor nota y número de intentos.
+  - Buscador en tiempo real por nombre de estudiante.
+  - **Botón de Exportar a Excel (CSV):** Permite al docente descargar la planilla completa con un solo clic.
+  - **Opción de Reinicio:** El profesor puede limpiar el ranking para iniciar una nueva clase o período.

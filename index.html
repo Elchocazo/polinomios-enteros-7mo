@@ -60,11 +60,41 @@
           🔊
         </button>
 
+        <button id="btn-exam-mode" class="clay-btn clay-btn-rose" title="Iniciar Evaluación de 10 preguntas">
+          📝 Modo Examen
+        </button>
+
+        <button id="btn-ranking-view" class="clay-btn clay-btn-indigo" title="Ver tabla de posiciones">
+          🏆 Ranking
+        </button>
+
         <button id="btn-help-modal" class="clay-btn clay-btn-amber" title="Guía rápida de reglas">
           📖 Reglas de Oro
         </button>
       </div>
     </header>
+
+    <!-- Banner superior activo de Modo Examen (visible solo durante el examen) -->
+    <section class="exam-active-banner hidden" id="exam-active-banner">
+      <div class="exam-student-meta">
+        <div class="exam-student-avatar">📝</div>
+        <div class="exam-student-info">
+          <h3 id="exam-banner-name">Estudiante: Nombre</h3>
+          <span class="exam-pill-attempt" id="exam-banner-attempt">Intento 1 de 3 • Escala 1.0 a 5.0</span>
+        </div>
+      </div>
+
+      <div class="exam-questions-tracker">
+        <span class="tracker-label">Preguntas del Examen (10 en total)</span>
+        <div class="tracker-dots-row" id="exam-dots-container">
+          <!-- 10 dots generados dinámicamente -->
+        </div>
+      </div>
+
+      <button id="btn-exam-exit" class="exam-exit-btn" title="Salir del examen">
+        ✕ Salir del Examen
+      </button>
+    </section>
 
     <!-- Barra de selección de Niveles y Modos -->
     <nav class="levels-nav">
@@ -336,6 +366,169 @@
       <div class="modal-footer">
         <button class="clay-btn clay-btn-outline" id="btn-cancel-custom">Cancelar</button>
         <button class="clay-btn clay-btn-indigo" id="btn-load-custom">Cargar y Empezar Ejercicio 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Registro e Inicio de Modo Examen -->
+  <div class="clay-modal-overlay hidden" id="modal-exam-register">
+    <div class="clay-modal">
+      <div class="modal-header">
+        <h2>📝 Evaluación: Polinomios con Enteros</h2>
+        <button class="close-btn" id="btn-close-exam-register">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-welcome-icon">🎓</div>
+        
+        <div class="exam-features-list">
+          <div class="exam-feature-item">
+            <span class="icon">📋</span>
+            <span><strong>10 Preguntas guiadas</strong> que evalúan jerarquía, suma/resta de enteros y ley de signos.</span>
+          </div>
+          <div class="exam-feature-item">
+            <span class="icon">🎯</span>
+            <span><strong>Calificación de 1.0 a 5.0</strong> (Nota mínima de aprobación: 3.0).</span>
+          </div>
+          <div class="exam-feature-item">
+            <span class="icon">🔄</span>
+            <span><strong>3 Oportunidades:</strong> Puedes repetir el examen para mejorar tu nota. ¡Se guarda siempre tu mejor nota!</span>
+          </div>
+          <div class="exam-feature-item">
+            <span class="icon">🏆</span>
+            <span><strong>Tabla de Ranking:</strong> Tu puesto quedará registrado en el tablero del salón.</span>
+          </div>
+        </div>
+
+        <div class="custom-input-box">
+          <label for="exam-input-name">Nombre y Apellidos completos del Estudiante:</label>
+          <input type="text" id="exam-input-name" class="clay-text-input" placeholder="Ej: Santiago Andrés Morales Castro" autofocus autocomplete="name">
+        </div>
+
+        <!-- Banner de detección si el estudiante ya tiene intentos previos -->
+        <div class="student-history-banner hidden" id="exam-student-history-banner">
+          <span style="font-size: 1.5rem;">ℹ️</span>
+          <div>
+            <strong id="exam-history-greeting">¡Hola, Estudiante!</strong>
+            <p id="exam-history-detail" style="font-size: 0.88rem; color: #1E3A8A; margin-top: 0.15rem;">
+              Llevas 1 de 3 intentos. Tu mejor nota actual es 3.8 / 5.0.
+            </p>
+          </div>
+        </div>
+
+        <div id="exam-register-error" class="clay-alert-error hidden">
+          Por favor ingresa tu nombre completo para poder registrar tu calificación.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="clay-btn clay-btn-outline" id="btn-exam-reg-ranking">🏆 Ver Ranking</button>
+        <button class="clay-btn clay-btn-rose" id="btn-start-exam-confirm">🚀 Iniciar Intento 1 de 3</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Resultados del Examen y Calificación -->
+  <div class="clay-modal-overlay hidden" id="modal-exam-results">
+    <div class="clay-modal">
+      <div class="modal-header">
+        <h2>📊 Resultados de la Evaluación</h2>
+        <button class="close-btn" id="btn-close-exam-results">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="exam-result-hero">
+          <div class="score-clay-podium">
+            <span class="grade-scale-text">Calificación Oficial</span>
+            <div class="grade-number-display" id="exam-final-grade">4.6</div>
+            <span class="grade-scale-text">Escala 1.0 a 5.0</span>
+            <div class="desempeno-badge desempeno-superior" id="exam-desempeno-badge">
+              🌟 Desempeño Superior
+            </div>
+          </div>
+
+          <div class="exam-stats-summary-grid">
+            <div class="exam-stat-box">
+              <div class="stat-box-val" id="exam-stat-correct">8 / 10</div>
+              <div class="stat-box-lbl">Preguntas Acertadas</div>
+            </div>
+            <div class="exam-stat-box">
+              <div class="stat-box-val" id="exam-stat-attempt">Intento 1 de 3</div>
+              <div class="stat-box-lbl">Oportunidades Usadas</div>
+            </div>
+            <div class="exam-stat-box">
+              <div class="stat-box-val" id="exam-stat-best">4.6 / 5.0</div>
+              <div class="stat-box-lbl">Mejor Nota Registrada</div>
+            </div>
+          </div>
+
+          <!-- Tarjeta de oportunidad para reintentar y mejorar la nota -->
+          <div class="retry-opportunity-card" id="exam-retry-card">
+            <h4 id="exam-retry-heading">🔄 ¿Deseas mejorar tu calificación?</h4>
+            <p id="exam-retry-text">
+              Te quedan 2 oportunidades disponibles. Presenta el examen nuevamente y superemos tu puntaje. ¡En el ranking solo queda tu mejor nota!
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="clay-btn clay-btn-outline" id="btn-exam-results-finish">🏠 Ir a Práctica</button>
+        <button class="clay-btn clay-btn-indigo" id="btn-exam-results-ranking">🏆 Ver Ranking</button>
+        <button class="clay-btn clay-btn-emerald" id="btn-exam-retry">🔄 Reintentar Examen (Intento 2 de 3)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Tabla de Ranking del Salón -->
+  <div class="clay-modal-overlay hidden" id="modal-ranking">
+    <div class="clay-modal" style="max-width: 800px;">
+      <div class="modal-header">
+        <h2>🏆 Ranking de Calificaciones - 7° Grado</h2>
+        <button class="close-btn" id="btn-close-ranking-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="ranking-controls-bar">
+          <div class="ranking-search-box">
+            <input type="text" id="ranking-search-input" class="clay-text-input" placeholder="🔍 Buscar estudiante por nombre..." style="font-size: 1rem; padding: 0.6rem 0.9rem;">
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="clay-btn clay-btn-outline" id="btn-ranking-export-csv" title="Descargar archivo compatible con Excel">
+              📥 Exportar Excel (CSV)
+            </button>
+            <button class="clay-btn clay-btn-outline" id="btn-ranking-clear-all" style="color: #BE123C;" title="Borrar registros de este grupo">
+              🗑️ Limpiar
+            </button>
+          </div>
+        </div>
+
+        <div class="ranking-table-container">
+          <table class="ranking-table">
+            <thead>
+              <tr>
+                <th style="width: 70px; text-align: center;">Puesto</th>
+                <th>Nombre del Estudiante</th>
+                <th style="text-align: center;">Mejor Nota</th>
+                <th style="text-align: center;">Aciertos</th>
+                <th style="text-align: center;">Intentos</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody id="ranking-table-body">
+              <!-- Filas generadas dinámicamente -->
+            </tbody>
+          </table>
+          <div class="ranking-empty-state hidden" id="ranking-empty-state">
+            <span class="ranking-empty-icon">📝</span>
+            <h3>Aún no hay calificaciones registradas</h3>
+            <p>Sé el primero en iniciar el Modo Examen y asegurar tu lugar en el podio.</p>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="clay-btn clay-btn-rose" id="btn-ranking-start-exam">🚀 Presentar Examen Ahora</button>
+        <button class="clay-btn clay-btn-outline" id="btn-close-ranking-modal-2">Cerrar</button>
       </div>
     </div>
   </div>

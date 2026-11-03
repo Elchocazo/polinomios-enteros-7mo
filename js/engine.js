@@ -103,14 +103,12 @@ class PolyEngine {
       const b = tokens[1];
       const result = a + b;
 
-      // Generar tip pedagógico sobre signos iguales o contrarios
+      // Generar regla pedagógica general (sin revelar el resultado por adelantado)
       let pedagogicalRule = '';
       if ((a >= 0 && b >= 0) || (a < 0 && b < 0)) {
-        pedagogicalRule = `Signos iguales (${a >= 0 ? '+' : '-'} y ${b >= 0 ? '+' : '-'}): se suman sus valores absolutos (${Math.abs(a)} + ${Math.abs(b)} = ${Math.abs(result)}) y se conserva el mismo signo (${result >= 0 ? '+' : '-'}${Math.abs(result)}).`;
+        pedagogicalRule = 'Signos iguales: se suman los valores absolutos y se conserva el mismo signo.';
       } else {
-        const mayor = Math.abs(a) >= Math.abs(b) ? a : b;
-        const menor = Math.abs(a) >= Math.abs(b) ? b : a;
-        pedagogicalRule = `Signos contrarios (${a >= 0 ? '+' : '-'} y ${b >= 0 ? '+' : '-'}): se restan (${Math.abs(mayor)} - ${Math.abs(menor)} = ${Math.abs(result)}) y gana el signo del número con mayor valor absoluto (${mayor >= 0 ? '+' : '-'}). Resultado: ${result >= 0 ? '+' : ''}${result}.`;
+        pedagogicalRule = 'Signos contrarios: se restan los valores y se coloca el signo del número con mayor valor absoluto.';
       }
 
       // Reconstruir la expresión simplificada

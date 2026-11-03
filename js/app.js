@@ -87,7 +87,6 @@ class PolyClayApp {
 
     // Entrada de resolución
     this.targetSubexprText = document.getElementById('target-subexpr-text');
-    this.pedagogicalHintBox = document.getElementById('pedagogical-hint-box');
     this.previewSign = document.getElementById('preview-sign');
     this.previewNum = document.getElementById('preview-num');
 
@@ -934,7 +933,6 @@ class PolyClayApp {
     this.phaseSignRule.classList.add('hidden');
 
     this.targetSubexprText.textContent = step.subexpr;
-    this.pedagogicalHintBox.innerHTML = `💡 <strong>Recuerda:</strong> ${step.pedagogicalRule || 'Resuelve respetando los signos de cada número.'}`;
 
     this.inputSign = '';
     this.inputNum = '';

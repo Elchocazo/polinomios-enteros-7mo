@@ -764,17 +764,6 @@ body {
   color: #78350F;
 }
 
-.pedagogical-tip {
-  background: #F0FDF4;
-  border: 2px dashed #34D399;
-  padding: 0.65rem 1.25rem;
-  border-radius: var(--radius-md);
-  font-size: 0.95rem;
-  color: #065F46;
-  text-align: center;
-  max-width: 650px;
-}
-
 .student-input-arena {
   display: flex;
   flex-direction: column;

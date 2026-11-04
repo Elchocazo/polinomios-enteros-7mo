@@ -3,6 +3,195 @@
  * Diseñado específicamente para los estándares de 7° grado de secundaria / educación básica
  */
 
+// ==========================================================================
+// GENERADOR PROCEDURAL DINÁMICO DE POLINOMIOS (ANTI-COPIA EN AULA)
+// ==========================================================================
+
+class PolynomialGenerator {
+  // Entero aleatorio entre min y max (evitando 0 para mayor dinamismo)
+  static randInt(min, max, avoidZero = true) {
+    let val = 0;
+    do {
+      val = Math.floor(Math.random() * (max - min + 1)) + min;
+    } while (avoidZero && val === 0);
+    return val;
+  }
+
+  static randSign() {
+    return Math.random() > 0.5 ? '+' : '-';
+  }
+
+  static formatTerm(num) {
+    return num >= 0 ? '+ ' + num : '- ' + Math.abs(num);
+  }
+
+  // Genera un polinomio según el nivel curricular con validación matemática
+  static generate(level = 1) {
+    let attempts = 0;
+    while (attempts < 15) {
+      attempts++;
+      const expr = this._generateRaw(level);
+      
+      // Validar si el motor matemático está disponible en el entorno
+      let engine = null;
+      if (typeof PolyEngine !== 'undefined') {
+        engine = new PolyEngine();
+      } else if (typeof window !== 'undefined' && window.PolyEngine) {
+        engine = new window.PolyEngine();
+      }
+
+      if (engine) {
+        const val = engine.validateBrackets(expr);
+        if (val.valid) {
+          let curr = expr;
+          let steps = 0;
+          let solvable = true;
+          while (steps < 25) {
+            const step = engine.getNextStep(curr);
+            if (!step) { solvable = false; break; }
+            if (step.type === 'FINISHED') break;
+            if (!step.nextExpr) { solvable = false; break; }
+            curr = step.nextExpr;
+            steps++;
+          }
+          if (solvable && steps < 25) {
+            return expr;
+          }
+        }
+      } else {
+        return expr;
+      }
+    }
+
+    // Fallbacks pedagógicos aleatorizados si excediera los intentos
+    const r1 = this.randInt(-9, 12);
+    const r2 = this.randInt(-8, 8);
+    const r3 = this.randInt(2, 9);
+    if (level === 1) return `${r1} - (${r2} + ${r3})`;
+    if (level === 2) return `${r1} + [ ${r2} - (${r3} + 4) ]`;
+    if (level === 3) return `${r1} - { -3 + [ 8 - (-4 + ${r3}) ] - 2 }`;
+    return `${r1} - { 6 - [ -4 + (3 - 8) - (-2 + 5) ] - 1 }`;
+  }
+
+  static _generateRaw(level) {
+    const a = this.randInt(-12, 16);
+    const b = this.randInt(-9, 9);
+    const c = this.randInt(-9, 9);
+    const s1 = this.randSign();
+    const s2 = this.randSign();
+
+    if (level === 1) {
+      // 4 plantillas dinámicas de paréntesis
+      const variant = Math.floor(Math.random() * 4);
+      if (variant === 0) {
+        return `${a} ${s1} (${b} ${this.formatTerm(c)})`;
+      } else if (variant === 1) {
+        const d = this.randInt(-9, 9);
+        return `(${a} ${this.formatTerm(b)}) ${s1} (${c} ${this.formatTerm(d)})`;
+      } else if (variant === 2) {
+        const d = this.randInt(-9, 9);
+        return `${a} ${s1} (${b} ${this.formatTerm(c)}) ${this.formatTerm(d)}`;
+      } else {
+        return `${a} - (${b} ${this.formatTerm(c)})`;
+      }
+    }
+
+    if (level === 2) {
+      // 3 plantillas de corchetes y paréntesis [ ( ) ]
+      const d = this.randInt(-9, 9);
+      const e = this.randInt(-8, 8);
+      const variant = Math.floor(Math.random() * 3);
+      if (variant === 0) {
+        return `${a} ${s1} [ ${b} ${s2} (${c} ${this.formatTerm(d)}) ]`;
+      } else if (variant === 1) {
+        return `${a} ${s1} [ ${b} ${s2} (${c} ${this.formatTerm(d)}) ${this.formatTerm(e)} ]`;
+      } else {
+        return `[ ${a} ${s1} (${b} ${this.formatTerm(c)}) ] ${this.formatTerm(d)}`;
+      }
+    }
+
+    if (level === 3) {
+      // 2 plantillas de llaves, corchetes y paréntesis { [ ( ) ] }
+      const d = this.randInt(-8, 8);
+      const e = this.randInt(-8, 8);
+      const f = this.randInt(-7, 7);
+      const variant = Math.floor(Math.random() * 2);
+      if (variant === 0) {
+        return `${a} ${s1} { ${b} + [ ${c} ${s2} (${d} ${this.formatTerm(e)}) ] ${this.formatTerm(f)} }`;
+      } else {
+        return `${a} ${s1} { ${b} - [ ${c} ${s2} (${d} ${this.formatTerm(e)}) ] }`;
+      }
+    }
+
+    // Nivel 4: Gran Desafío de Maestría con múltiples ramas
+    const d = this.randInt(-8, 8);
+    const e = this.randInt(-8, 8);
+    const f = this.randInt(-8, 8);
+    const g = this.randInt(-8, 8);
+    const h = this.randInt(-7, 7);
+    const variant = Math.floor(Math.random() * 2);
+    if (variant === 0) {
+      return `${a} ${s1} { ${b} - [ ${c} + (${d} ${this.formatTerm(e)}) - (${f} ${this.formatTerm(g)}) ] ${this.formatTerm(h)} }`;
+    } else {
+      return `[ ${a} - (${b} ${this.formatTerm(c)}) ] - { ${d} - [ ${e} ${s2} (${f} ${this.formatTerm(g)}) ] }`;
+    }
+  }
+
+  // Genera un set completo de 10 preguntas únicas para evaluación:
+  // Garantiza que dos estudiantes sentados juntos en el aula tengan polinomios diferentes.
+  static generateExamSet() {
+    const questions = [];
+    const used = new Set();
+
+    const addUnique = (level) => {
+      let q = '';
+      let tries = 0;
+      do {
+        q = this.generate(level);
+        tries++;
+      } while (used.has(q) && tries < 20);
+      used.add(q);
+      questions.push(q);
+    };
+
+    // Preguntas 1 a 4: Nivel 1 (Paréntesis)
+    addUnique(1);
+    addUnique(1);
+    addUnique(1);
+    addUnique(1);
+
+    // Preguntas 5 a 7: Nivel 2 (Corchetes y paréntesis)
+    addUnique(2);
+    addUnique(2);
+    addUnique(2);
+
+    // Preguntas 8 y 9: Nivel 3 (Llaves, corchetes y paréntesis)
+    addUnique(3);
+    addUnique(3);
+
+    // Pregunta 10: Nivel 4 (Gran desafío de maestría)
+    addUnique(4);
+
+    return questions;
+  }
+
+  // Genera ejercicios frescos y aleatorios para la práctica de cada nivel
+  static refreshCurriculumLevels() {
+    if (typeof CURRICULUM_LEVELS !== 'undefined') {
+      CURRICULUM_LEVELS.forEach(lvl => {
+        lvl.exercises = [
+          this.generate(lvl.id),
+          this.generate(lvl.id),
+          this.generate(lvl.id),
+          this.generate(lvl.id),
+          this.generate(lvl.id)
+        ];
+      });
+    }
+  }
+}
+
+// Niveles curriculares inicializados dinámicamente
 const CURRICULUM_LEVELS = [
   {
     id: 1,
@@ -11,11 +200,11 @@ const CURRICULUM_LEVELS = [
     description: "Dominio de paréntesis simples, números positivos/negativos y ley de signos básica.",
     colorTheme: "#D97706",
     exercises: [
-      "5 - (-3 + 8)",
-      "-7 + (4 - 9)",
-      "12 - (-6 - 4)",
-      "-15 - (9 - 14)",
-      "(-8 + 3) - (-5 + 7)"
+      PolynomialGenerator.generate(1),
+      PolynomialGenerator.generate(1),
+      PolynomialGenerator.generate(1),
+      PolynomialGenerator.generate(1),
+      PolynomialGenerator.generate(1)
     ]
   },
   {
@@ -25,11 +214,11 @@ const CURRICULUM_LEVELS = [
     description: "Jerarquía de dos niveles: resuelve primero los paréntesis ( ) y luego los corchetes [ ].",
     colorTheme: "#2563EB",
     exercises: [
-      "-2 + [ 5 - (-3 + 6) + 1 ]",
-      "10 - [ -4 + (8 - 12) - 3 ]",
-      "[ -7 - (-2 + 5) ] + 8",
-      "6 + [ 12 - (-5 - 3) - 9 ]",
-      "-14 + [ 20 - (15 - 8) + (-6) ]"
+      PolynomialGenerator.generate(2),
+      PolynomialGenerator.generate(2),
+      PolynomialGenerator.generate(2),
+      PolynomialGenerator.generate(2),
+      PolynomialGenerator.generate(2)
     ]
   },
   {
@@ -39,11 +228,11 @@ const CURRICULUM_LEVELS = [
     description: "La tríada completa de signos de agrupación: { [ ( ) ] } de adentro hacia afuera.",
     colorTheme: "#7C3AED",
     exercises: [
-      "15 - { -3 + [ 8 - (-4 + 6) ] - 2 }",
-      "-5 + { 7 - [ -2 + (-6 + 10) ] + 4 }",
-      "12 - { -4 + [ 9 - (5 - 8) ] - 1 }",
-      "- { 8 - [ 14 - (-5 + 9) ] + (-6) }",
-      "22 - { 10 - [ -5 + (4 - 11) - 2 ] + 3 }"
+      PolynomialGenerator.generate(3),
+      PolynomialGenerator.generate(3),
+      PolynomialGenerator.generate(3),
+      PolynomialGenerator.generate(3),
+      PolynomialGenerator.generate(3)
     ]
   },
   {
@@ -53,55 +242,20 @@ const CURRICULUM_LEVELS = [
     description: "Polinomios complejos con múltiples ramas de agrupación simultáneas y operaciones combinadas.",
     colorTheme: "#059669",
     exercises: [
-      "20 - { 6 - [ -4 + (3 - 8) - (-2 + 5) ] - 1 }",
-      "-8 + { [ -5 - (-3 + 9) ] - [ 4 + (-7 + 2) ] }",
-      "14 - { -2 + [ 11 - (-5 - 4) + (8 - 12) ] - 7 }",
-      "-{ [ -3 + (-4 + 9) ] - { 7 - [ 2 - (-5 + 1) ] } }"
+      PolynomialGenerator.generate(4),
+      PolynomialGenerator.generate(4),
+      PolynomialGenerator.generate(4),
+      PolynomialGenerator.generate(4),
+      PolynomialGenerator.generate(4)
     ]
   }
 ];
 
-// Sets oficiales de 10 preguntas para Modo Examen (progresión pedagógica garantizada)
+// Sets de respaldo para compatibilidad
 const EXAM_SETS = [
-  // Intento 1
-  [
-    "8 - (-3 + 5)",
-    "-12 + (7 - 15)",
-    "15 - (-4 - 6)",
-    "-5 - (8 - 14)",
-    "6 + [ 4 - (-2 + 7) ]",
-    "-10 + [ 12 - (5 - 9) - 3 ]",
-    "[ -8 - (-3 + 6) ] + 5",
-    "18 - { -4 + [ 7 - (-2 + 5) ] - 1 }",
-    "-7 + { 10 - [ -3 + (-5 + 9) ] + 2 }",
-    "25 - { 8 - [ -6 + (4 - 11) - (-3 + 5) ] - 2 }"
-  ],
-  // Intento 2 (Números y expresiones equivalentes para segunda oportunidad)
-  [
-    "10 - (-5 + 9)",
-    "-8 + (6 - 14)",
-    "14 - (-3 - 7)",
-    "-9 - (4 - 11)",
-    "7 + [ 3 - (-4 + 9) ]",
-    "-8 + [ 15 - (6 - 11) - 4 ]",
-    "[ -9 - (-5 + 8) ] + 6",
-    "16 - { -2 + [ 9 - (-3 + 6) ] - 3 }",
-    "-6 + { 12 - [ -4 + (-3 + 8) ] + 1 }",
-    "22 - { 7 - [ -5 + (3 - 9) - (-4 + 6) ] - 3 }"
-  ],
-  // Intento 3 (Tercera y última oportunidad)
-  [
-    "9 - (-4 + 7)",
-    "-11 + (5 - 13)",
-    "16 - (-5 - 8)",
-    "-7 - (6 - 15)",
-    "5 + [ 6 - (-3 + 8) ]",
-    "-12 + [ 14 - (7 - 12) - 2 ]",
-    "[ -10 - (-4 + 9) ] + 7",
-    "20 - { -5 + [ 8 - (-4 + 7) ] - 2 }",
-    "-8 + { 11 - [ -2 + (-6 + 10) ] + 3 }",
-    "24 - { 9 - [ -4 + (5 - 12) - (-2 + 6) ] - 1 }"
-  ]
+  PolynomialGenerator.generateExamSet(),
+  PolynomialGenerator.generateExamSet(),
+  PolynomialGenerator.generateExamSet()
 ];
 
 // Gestor de Ranking y Persistencia (localStorage)
@@ -178,34 +332,29 @@ class RankingManager {
     list.sort((a, b) => {
       if (b.bestGrade !== a.bestGrade) return b.bestGrade - a.bestGrade;
       if (a.attemptsCount !== b.attemptsCount) return a.attemptsCount - b.attemptsCount;
-      return a.name.localeCompare(b.name);
+      return b.bestScore - a.bestScore;
     });
 
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(list));
     } catch (e) {
-      console.error('Error al guardar en localStorage:', e);
+      console.error('Error al guardar en el ranking:', e);
     }
 
     return student;
   }
 
   static clearAll() {
-    try {
-      localStorage.removeItem(this.STORAGE_KEY);
-      return true;
-    } catch (e) {
-      console.error(e);
-      return false;
-    }
+    localStorage.removeItem(this.STORAGE_KEY);
   }
 
-  static exportCSV() {
+  static exportToCSV() {
     const list = this.getAll();
     if (list.length === 0) return null;
 
-    let csv = '\uFEFF'; // BOM para que Excel en español abra tildes y caracteres correctamente
-    csv += 'Puesto;Nombre Completo;Mejor Nota (1.0 a 5.0);Aciertos (de 10);Intentos Usados;Desempeño;Fecha de Registro\n';
+    // Encabezados con codificación UTF-8 para Excel
+    let csv = '\uFEFF';
+    csv += 'Puesto;Nombre Completo;Mejor Calificación (1.0 - 5.0);Aciertos Examen;Oportunidades Usadas;Nivel de Desempeño;Última Evaluación\n';
 
     list.forEach((item, idx) => {
       let desempeno = 'Bajo';
@@ -220,55 +369,11 @@ class RankingManager {
   }
 }
 
-// Generador procedural aleatorio de polinomios aritméticos con enteros
-class PolynomialGenerator {
-  // Entero aleatorio entre min y max (evitando 0 para mayor dinamismo)
-  static randInt(min, max, avoidZero = true) {
-    let val = 0;
-    do {
-      val = Math.floor(Math.random() * (max - min + 1)) + min;
-    } while (avoidZero && val === 0);
-    return val;
-  }
-
-  // Genera un polinomio según el nivel de dificultad (1 a 3)
-  static generate(level = 1) {
-    const a = this.randInt(-9, 15);
-    const b = this.randInt(-9, 9);
-    const c = this.randInt(-9, 9);
-
-    if (level === 1) {
-      // Formato: A - ( B + C )
-      const signOp = Math.random() > 0.5 ? '-' : '+';
-      return `${a} ${signOp} (${b >= 0 ? b : b} ${c >= 0 ? '+ ' + c : '- ' + Math.abs(c)})`;
-    }
-
-    if (level === 2) {
-      // Formato: A + [ B - ( C + D ) + E ]
-      const d = this.randInt(-9, 9);
-      const e = this.randInt(-8, 8);
-      const sign1 = Math.random() > 0.5 ? '-' : '+';
-      const sign2 = Math.random() > 0.5 ? '-' : '+';
-      return `${a} ${sign1} [ ${b} ${sign2} (${c} ${d >= 0 ? '+ ' + d : '- ' + Math.abs(d)}) ${e >= 0 ? '+ ' + e : '- ' + Math.abs(e)} ]`;
-    }
-
-    // Nivel 3 o mayor: { [ ( ) ] }
-    const d = this.randInt(-8, 8);
-    const e = this.randInt(-9, 9);
-    const f = this.randInt(-7, 7);
-    const signOuter = Math.random() > 0.5 ? '-' : '+';
-    const signMid = Math.random() > 0.5 ? '-' : '+';
-    const signInner = Math.random() > 0.5 ? '-' : '+';
-
-    return `${a} ${signOuter} { ${b} + [ ${c} ${signMid} (${d} ${signInner} ${Math.abs(e)}) ] ${f >= 0 ? '- ' + f : '+ ' + Math.abs(f)} }`;
-  }
-}
-
 if (typeof window !== 'undefined') {
+  window.PolynomialGenerator = PolynomialGenerator;
   window.CURRICULUM_LEVELS = CURRICULUM_LEVELS;
   window.EXAM_SETS = EXAM_SETS;
   window.RankingManager = RankingManager;
-  window.PolynomialGenerator = PolynomialGenerator;
 }
 
 if (typeof module !== 'undefined' && module.exports) {

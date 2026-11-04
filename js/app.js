@@ -42,6 +42,9 @@ class PolyClayApp {
     this.cacheDom();
     this.bindEvents();
     this.initConfetti();
+    if (typeof PolynomialGenerator !== 'undefined' && PolynomialGenerator.refreshCurriculumLevels) {
+      PolynomialGenerator.refreshCurriculumLevels();
+    }
     this.renderLevelSelector();
     this.loadExercise(0, 0);
   }
@@ -363,13 +366,18 @@ class PolyClayApp {
       this.startCustomExercise(generated, `Ejercicio Generado (${CURRICULUM_LEVELS[this.currentLevelIdx].name})`);
     });
 
-    // Reiniciar ejercicio
+    // Reiniciar ejercicio (en práctica genera un ejercicio nuevo y diferente)
     this.btnResetCurrent.addEventListener('click', () => {
       this.sound.playClick();
-      this.currentExpression = this.originalExpression;
-      this.stepsHistory = [];
-      this.updateStepsHistoryDisplay();
-      this.processCurrentExpressionState();
+      if (!this.isExamMode) {
+        this.loadExercise(this.currentLevelIdx, this.currentExerciseIdx);
+      } else {
+        this.currentExpression = this.originalExpression;
+        this.stepsHistory = [];
+        this.updateStepsHistoryDisplay();
+        this.processCurrentExpressionState();
+      }
+    });
     });
 
     // Teclado en pantalla
@@ -473,9 +481,17 @@ class PolyClayApp {
 
     this.currentLevelIdx = levelIdx;
     const level = CURRICULUM_LEVELS[levelIdx];
-    this.currentExerciseIdx = exerciseIdx % level.exercises.length;
+    this.currentExerciseIdx = exerciseIdx % (level.exercises.length || 5);
 
-    const expr = level.exercises[this.currentExerciseIdx];
+    // Generar SIEMPRE un ejercicio nuevo, dinámico y único cada vez que se entra o avanza
+    let expr = '';
+    if (typeof PolynomialGenerator !== 'undefined' && PolynomialGenerator.generate) {
+      expr = PolynomialGenerator.generate(level.id);
+      level.exercises[this.currentExerciseIdx] = expr;
+    } else {
+      expr = level.exercises[this.currentExerciseIdx] || '8 - (-3 + 5)';
+    }
+
     this.originalExpression = expr;
     this.currentExpression = expr;
     this.stepsHistory = [];
@@ -715,9 +731,14 @@ class PolyClayApp {
     this.examAciertos = 0;
     this.examQuestionResults = new Array(10).fill(null);
 
-    // Seleccionar set de preguntas según el intento (1, 2 o 3)
-    const setIdx = (attemptNum - 1) % EXAM_SETS.length;
-    this.examQuestions = [...EXAM_SETS[setIdx]];
+    // Generar un set de 10 preguntas dinámicas y únicas:
+    // Asegura que dos estudiantes contiguos en la sala de sistemas tengan ejercicios completamente diferentes.
+    if (typeof PolynomialGenerator !== 'undefined' && PolynomialGenerator.generateExamSet) {
+      this.examQuestions = PolynomialGenerator.generateExamSet();
+    } else {
+      const setIdx = (attemptNum - 1) % EXAM_SETS.length;
+      this.examQuestions = [...EXAM_SETS[setIdx]];
+    }
 
     // Actualizar banner superior de examen
     this.examActiveBanner.classList.remove('hidden');
@@ -1540,6 +1561,9 @@ class PolyClayApp {
       if (this.currentLevelIdx + 1 < CURRICULUM_LEVELS.length) {
         this.loadExercise(this.currentLevelIdx + 1, 0);
       } else {
+        if (typeof PolynomialGenerator !== 'undefined' && PolynomialGenerator.refreshCurriculumLevels) {
+          PolynomialGenerator.refreshCurriculumLevels();
+        }
         this.loadExercise(0, 0);
       }
     }

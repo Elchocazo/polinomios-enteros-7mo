@@ -37,6 +37,7 @@ class PolyClayApp {
     this.examAciertos = 0;
     this.examQuestionResults = [];
     this.evalEngine = typeof EvaluationEngine !== 'undefined' ? new EvaluationEngine() : null;
+    this.isProcessingStep = false; // Candado anti-doble clic para evitar duplicación de pasos
 
     // Inicializar referencias DOM y eventos
     this.cacheDom();
@@ -476,6 +477,7 @@ class PolyClayApp {
 
   loadExercise(levelIdx, exerciseIdx) {
     this.isExamMode = false;
+    this.isProcessingStep = false;
     this.examActiveBanner.classList.add('hidden');
 
     this.currentLevelIdx = levelIdx;
@@ -1187,12 +1189,16 @@ class PolyClayApp {
   }
 
   handleIdentifyChoice(opt, step) {
+    if (this.isProcessingStep) return;
+
     if (opt.isCorrect) {
+      this.isProcessingStep = true;
       this.sound.playSuccess();
       this.addScore(100);
       this.increaseStreak();
 
       this.showFeedback(true, '¡Excelente elección de jerarquía!', opt.feedback, () => {
+        this.isProcessingStep = false;
         this.startPhaseSolve(step);
       });
     } else {
@@ -1254,6 +1260,7 @@ class PolyClayApp {
   }
 
   handleKeypadInput(action, val) {
+    if (this.isProcessingStep) return;
     this.sound.playClick();
 
     if (action === 'set-sign') {
@@ -1285,6 +1292,8 @@ class PolyClayApp {
   }
 
   submitAnswer() {
+    if (this.isProcessingStep) return;
+
     if (!this.inputNum) {
       this.sound.playError();
       this.showFeedback(false, 'Ingresa un número', 'Por favor ingresa el valor numérico del resultado antes de comprobar.');
@@ -1292,6 +1301,8 @@ class PolyClayApp {
     }
 
     const step = this.currentStepData;
+    if (!step) return;
+
     const userNum = parseInt(this.inputNum, 10);
     let userSign = this.inputSign;
     if (!userSign) {
@@ -1302,6 +1313,12 @@ class PolyClayApp {
     const expectedNum = step.expectedNum;
 
     if (userNum === expectedNum && (userSign === expectedSign || (expectedNum === 0))) {
+      // Candado anti-spam: evita que clics repetidos dupliquen el historial
+      this.isProcessingStep = true;
+      this.inputSign = '';
+      this.inputNum = '';
+      this.updatePreviewDisplay();
+
       // ¡Acierto en este paso!
       this.sound.playSuccess();
       this.addScore(150);
@@ -1321,6 +1338,7 @@ class PolyClayApp {
         '¡Cálculo Correcto! 🎯',
         `Muy bien: ${step.subexpr} da como resultado ${expectedSign === '-' ? '-' : ''}${expectedNum}. ${step.pedagogicalRule}`,
         () => {
+          this.isProcessingStep = false;
           this.processCurrentExpressionState();
         }
       );
@@ -1389,10 +1407,14 @@ class PolyClayApp {
   }
 
   handleSignRuleChoice(chosenSign) {
+    if (this.isProcessingStep) return;
     const step = this.currentStepData;
+    if (!step) return;
+
     this.sound.playClick();
 
     if (chosenSign === step.expectedSign) {
+      this.isProcessingStep = true;
       this.sound.playSuccess();
       this.addScore(120);
       this.increaseStreak();
@@ -1411,6 +1433,7 @@ class PolyClayApp {
         '¡Excelente aplicación de la ley de signos!',
         step.ruleExplanation,
         () => {
+          this.isProcessingStep = false;
           this.processCurrentExpressionState();
         }
       );
@@ -1595,6 +1618,7 @@ class PolyClayApp {
     if (nextCallback) {
       this.btnNextStep.classList.remove('hidden');
       this.btnNextStep.onclick = () => {
+        this.btnNextStep.onclick = null;
         this.feedbackMessage.classList.add('hidden');
         nextCallback();
       };

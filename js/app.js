@@ -42,6 +42,9 @@ class PolyClayApp {
     this.cacheDom();
     this.bindEvents();
     this.initConfetti();
+    if (typeof PolynomialGenerator !== 'undefined' && PolynomialGenerator.refreshCurriculumLevels) {
+      PolynomialGenerator.refreshCurriculumLevels();
+    }
     this.renderLevelSelector();
     this.loadExercise(0, 0);
   }
@@ -715,9 +718,14 @@ class PolyClayApp {
     this.examAciertos = 0;
     this.examQuestionResults = new Array(10).fill(null);
 
-    // Seleccionar set de preguntas según el intento (1, 2 o 3)
-    const setIdx = (attemptNum - 1) % EXAM_SETS.length;
-    this.examQuestions = [...EXAM_SETS[setIdx]];
+    // Generar un set de 10 preguntas dinámicas y únicas:
+    // Asegura que dos estudiantes contiguos en la sala de sistemas tengan ejercicios completamente diferentes.
+    if (typeof PolynomialGenerator !== 'undefined' && PolynomialGenerator.generateExamSet) {
+      this.examQuestions = PolynomialGenerator.generateExamSet();
+    } else {
+      const setIdx = (attemptNum - 1) % EXAM_SETS.length;
+      this.examQuestions = [...EXAM_SETS[setIdx]];
+    }
 
     // Actualizar banner superior de examen
     this.examActiveBanner.classList.remove('hidden');
@@ -1540,6 +1548,9 @@ class PolyClayApp {
       if (this.currentLevelIdx + 1 < CURRICULUM_LEVELS.length) {
         this.loadExercise(this.currentLevelIdx + 1, 0);
       } else {
+        if (typeof PolynomialGenerator !== 'undefined' && PolynomialGenerator.refreshCurriculumLevels) {
+          PolynomialGenerator.refreshCurriculumLevels();
+        }
         this.loadExercise(0, 0);
       }
     }

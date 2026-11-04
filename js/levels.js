@@ -231,38 +231,179 @@ class PolynomialGenerator {
     return val;
   }
 
-  // Genera un polinomio según el nivel de dificultad (1 a 3)
+  static randSign() {
+    return Math.random() > 0.5 ? '+' : '-';
+  }
+
+  static formatTerm(num) {
+    return num >= 0 ? '+ ' + num : '- ' + Math.abs(num);
+  }
+
+  // Genera un polinomio según el nivel curricular con validación matemática
   static generate(level = 1) {
-    const a = this.randInt(-9, 15);
+    let attempts = 0;
+    while (attempts < 15) {
+      attempts++;
+      const expr = this._generateRaw(level);
+      
+      // Validar si el motor matemático está disponible en el entorno
+      let engine = null;
+      if (typeof PolyEngine !== 'undefined') {
+        engine = new PolyEngine();
+      } else if (typeof window !== 'undefined' && window.PolyEngine) {
+        engine = new window.PolyEngine();
+      }
+
+      if (engine) {
+        const val = engine.validateBrackets(expr);
+        if (val.valid) {
+          let curr = expr;
+          let steps = 0;
+          let solvable = true;
+          while (steps < 25) {
+            const step = engine.getNextStep(curr);
+            if (!step) { solvable = false; break; }
+            if (step.type === 'FINISHED') break;
+            if (!step.nextExpr) { solvable = false; break; }
+            curr = step.nextExpr;
+            steps++;
+          }
+          if (solvable && steps < 25) {
+            return expr;
+          }
+        }
+      } else {
+        return expr;
+      }
+    }
+
+    // Fallbacks pedagógicos estándar si excediera los intentos
+    if (level === 1) return `${this.randInt(-9, 12)} - (${this.randInt(-7, 7)} + ${this.randInt(2, 9)})`;
+    if (level === 2) return `${this.randInt(-9, 12)} + [ ${this.randInt(-6, 8)} - (${this.randInt(-5, 5)} + ${this.randInt(2, 7)}) ]`;
+    if (level === 3) return `15 - { -3 + [ 8 - (-4 + 6) ] - 2 }`;
+    return `20 - { 6 - [ -4 + (3 - 8) - (-2 + 5) ] - 1 }`;
+  }
+
+  static _generateRaw(level) {
+    const a = this.randInt(-12, 16);
     const b = this.randInt(-9, 9);
     const c = this.randInt(-9, 9);
+    const s1 = this.randSign();
+    const s2 = this.randSign();
 
     if (level === 1) {
-      // Formato: A - ( B + C )
-      const signOp = Math.random() > 0.5 ? '-' : '+';
-      return `${a} ${signOp} (${b >= 0 ? b : b} ${c >= 0 ? '+ ' + c : '- ' + Math.abs(c)})`;
+      // 4 plantillas dinámicas de paréntesis
+      const variant = Math.floor(Math.random() * 4);
+      if (variant === 0) {
+        return `${a} ${s1} (${b} ${this.formatTerm(c)})`;
+      } else if (variant === 1) {
+        const d = this.randInt(-9, 9);
+        return `(${a} ${this.formatTerm(b)}) ${s1} (${c} ${this.formatTerm(d)})`;
+      } else if (variant === 2) {
+        const d = this.randInt(-9, 9);
+        return `${a} ${s1} (${b} ${this.formatTerm(c)}) ${this.formatTerm(d)}`;
+      } else {
+        return `${a} - (${b} ${this.formatTerm(c)})`;
+      }
     }
 
     if (level === 2) {
-      // Formato: A + [ B - ( C + D ) + E ]
+      // 3 plantillas de corchetes y paréntesis [ ( ) ]
       const d = this.randInt(-9, 9);
       const e = this.randInt(-8, 8);
-      const sign1 = Math.random() > 0.5 ? '-' : '+';
-      const sign2 = Math.random() > 0.5 ? '-' : '+';
-      return `${a} ${sign1} [ ${b} ${sign2} (${c} ${d >= 0 ? '+ ' + d : '- ' + Math.abs(d)}) ${e >= 0 ? '+ ' + e : '- ' + Math.abs(e)} ]`;
+      const variant = Math.floor(Math.random() * 3);
+      if (variant === 0) {
+        return `${a} ${s1} [ ${b} ${s2} (${c} ${this.formatTerm(d)}) ]`;
+      } else if (variant === 1) {
+        return `${a} ${s1} [ ${b} ${s2} (${c} ${this.formatTerm(d)}) ${this.formatTerm(e)} ]`;
+      } else {
+        return `[ ${a} ${s1} (${b} ${this.formatTerm(c)}) ] ${this.formatTerm(d)}`;
+      }
     }
 
-    // Nivel 3 o mayor: { [ ( ) ] }
-    const d = this.randInt(-8, 8);
-    const e = this.randInt(-9, 9);
-    const f = this.randInt(-7, 7);
-    const signOuter = Math.random() > 0.5 ? '-' : '+';
-    const signMid = Math.random() > 0.5 ? '-' : '+';
-    const signInner = Math.random() > 0.5 ? '-' : '+';
+    if (level === 3) {
+      // 2 plantillas de llaves, corchetes y paréntesis { [ ( ) ] }
+      const d = this.randInt(-8, 8);
+      const e = this.randInt(-8, 8);
+      const f = this.randInt(-7, 7);
+      const variant = Math.floor(Math.random() * 2);
+      if (variant === 0) {
+        return `${a} ${s1} { ${b} + [ ${c} ${s2} (${d} ${this.formatTerm(e)}) ] ${this.formatTerm(f)} }`;
+      } else {
+        return `${a} ${s1} { ${b} - [ ${c} ${s2} (${d} ${this.formatTerm(e)}) ] }`;
+      }
+    }
 
-    return `${a} ${signOuter} { ${b} + [ ${c} ${signMid} (${d} ${signInner} ${Math.abs(e)}) ] ${f >= 0 ? '- ' + f : '+ ' + Math.abs(f)} }`;
+    // Nivel 4: Gran Desafío de Maestría con múltiples ramas
+    const d = this.randInt(-8, 8);
+    const e = this.randInt(-8, 8);
+    const f = this.randInt(-8, 8);
+    const g = this.randInt(-8, 8);
+    const h = this.randInt(-7, 7);
+    const variant = Math.floor(Math.random() * 2);
+    if (variant === 0) {
+      return `${a} ${s1} { ${b} - [ ${c} + (${d} ${this.formatTerm(e)}) - (${f} ${this.formatTerm(g)}) ] ${this.formatTerm(h)} }`;
+    } else {
+      return `[ ${a} - (${b} ${this.formatTerm(c)}) ] - { ${d} - [ ${e} ${s2} (${f} ${this.formatTerm(g)}) ] }`;
+    }
+  }
+
+  // Genera un set completo de 10 preguntas únicas para evaluación:
+  // Garantiza que dos estudiantes sentados juntos en el aula tengan polinomios diferentes.
+  static generateExamSet() {
+    const questions = [];
+    const used = new Set();
+
+    const addUnique = (level) => {
+      let q = '';
+      let tries = 0;
+      do {
+        q = this.generate(level);
+        tries++;
+      } while (used.has(q) && tries < 20);
+      used.add(q);
+      questions.push(q);
+    };
+
+    // Preguntas 1 a 4: Nivel 1 (Paréntesis)
+    addUnique(1);
+    addUnique(1);
+    addUnique(1);
+    addUnique(1);
+
+    // Preguntas 5 a 7: Nivel 2 (Corchetes y paréntesis)
+    addUnique(2);
+    addUnique(2);
+    addUnique(2);
+
+    // Preguntas 8 y 9: Nivel 3 (Llaves, corchetes y paréntesis)
+    addUnique(3);
+    addUnique(3);
+
+    // Pregunta 10: Nivel 4 (Gran desafío de maestría)
+    addUnique(4);
+
+    return questions;
+  }
+
+  // Genera ejercicios frescos y aleatorios para la práctica de cada nivel
+  static refreshCurriculumLevels() {
+    if (typeof CURRICULUM_LEVELS !== 'undefined') {
+      CURRICULUM_LEVELS.forEach(lvl => {
+        lvl.exercises = [
+          this.generate(lvl.id),
+          this.generate(lvl.id),
+          this.generate(lvl.id),
+          this.generate(lvl.id),
+          this.generate(lvl.id)
+        ];
+      });
+    }
   }
 }
+
+// Inicializar ejercicios curriculares dinámicos al cargar el módulo
+PolynomialGenerator.refreshCurriculumLevels();
 
 if (typeof window !== 'undefined') {
   window.CURRICULUM_LEVELS = CURRICULUM_LEVELS;

@@ -166,102 +166,110 @@
         </div>
       </section>
 
-      <!-- Área de Interacción y Resolución del Estudiante -->
-      <section class="clay-card interaction-card" id="interaction-zone">
+      <!-- Contenedor Dividido: Área de Interacción (Izquierda) + Historial Didáctico en Tiempo Real (Derecha) -->
+      <div class="workspace-split-container">
         
-        <!-- Fase 1: Identificar por dónde empezar (Jerarquía) -->
-        <div class="interaction-phase" id="phase-identify">
-          <h3 class="phase-title">🎯 ¿Cuál bloque debemos resolver primero?</h3>
-          <p class="phase-desc">Toca en la expresión el bloque correcto o elige una de las opciones:</p>
-          <div class="options-grid" id="identify-options-grid">
-            <!-- Opciones generadas por JS -->
-          </div>
-        </div>
-
-        <!-- Fase 2: Resolver la operación matemática interna -->
-        <div class="interaction-phase hidden" id="phase-solve">
-          <div class="solve-header">
-            <div class="target-subexpr-badge">
-              <span class="target-label">Operación a resolver:</span>
-              <span class="target-expr" id="target-subexpr-text">( -7 + 12 )</span>
+        <!-- Área de Interacción y Resolución del Estudiante (Izquierda) -->
+        <section class="clay-card interaction-card" id="interaction-zone">
+          
+          <!-- Fase 1: Identificar por dónde empezar (Jerarquía) -->
+          <div class="interaction-phase" id="phase-identify">
+            <h3 class="phase-title">🎯 ¿Cuál bloque debemos resolver primero?</h3>
+            <p class="phase-desc">Toca en la expresión el bloque correcto o elige una de las opciones:</p>
+            <div class="options-grid" id="identify-options-grid">
+              <!-- Opciones generadas por JS -->
             </div>
           </div>
 
-          <div class="student-input-arena">
-            <div class="input-display-clay">
-              <span class="prompt-symbol">Resultado =</span>
-              <div class="interactive-result-box" id="student-result-preview">
-                <span class="res-sign" id="preview-sign"></span>
-                <span class="res-num" id="preview-num">?</span>
+          <!-- Fase 2: Resolver la operación matemática interna -->
+          <div class="interaction-phase hidden" id="phase-solve">
+            <div class="solve-header">
+              <div class="target-subexpr-badge">
+                <span class="target-label">Operación a resolver:</span>
+                <span class="target-expr" id="target-subexpr-text">( -7 + 12 )</span>
               </div>
             </div>
 
-            <!-- Teclado en pantalla táctil con Claymorfismo -->
-            <div class="clay-keypad">
-              <div class="keypad-row">
-                <button class="key-btn key-sign" data-action="set-sign" data-val="+">+</button>
-                <button class="key-btn key-sign" data-action="set-sign" data-val="-">-</button>
-                <button class="key-btn key-num" data-action="num" data-val="1">1</button>
-                <button class="key-btn key-num" data-action="num" data-val="2">2</button>
-                <button class="key-btn key-num" data-action="num" data-val="3">3</button>
+            <div class="student-input-arena">
+              <div class="input-display-clay">
+                <span class="prompt-symbol">Resultado =</span>
+                <div class="interactive-result-box" id="student-result-preview">
+                  <span class="res-sign" id="preview-sign"></span>
+                  <span class="res-num" id="preview-num">?</span>
+                </div>
               </div>
-              <div class="keypad-row">
-                <button class="key-btn key-num" data-action="num" data-val="4">4</button>
-                <button class="key-btn key-num" data-action="num" data-val="5">5</button>
-                <button class="key-btn key-num" data-action="num" data-val="6">6</button>
-                <button class="key-btn key-num" data-action="num" data-val="7">7</button>
-                <button class="key-btn key-num" data-action="num" data-val="8">8</button>
-              </div>
-              <div class="keypad-row">
-                <button class="key-btn key-num" data-action="num" data-val="9">9</button>
-                <button class="key-btn key-num" data-action="num" data-val="0">0</button>
-                <button class="key-btn key-action key-backspace" data-action="backspace" title="Borrar">⌫</button>
-                <button class="key-btn key-action key-clear" data-action="clear" title="Limpiar">C</button>
-                <button class="key-btn key-submit" id="btn-submit-answer" data-action="submit">¡Comprobar! ✓</button>
+
+              <!-- Teclado en pantalla estilo teclado numérico de computador (PC Numpad) -->
+              <div class="clay-keypad">
+                <div class="keypad-pc-grid">
+                  <!-- Fila 1: 7, 8, 9 y signo + -->
+                  <button class="key-btn key-num" data-action="num" data-val="7">7</button>
+                  <button class="key-btn key-num" data-action="num" data-val="8">8</button>
+                  <button class="key-btn key-num" data-action="num" data-val="9">9</button>
+                  <button class="key-btn key-sign" data-action="set-sign" data-val="+">+</button>
+
+                  <!-- Fila 2: 4, 5, 6 y signo - -->
+                  <button class="key-btn key-num" data-action="num" data-val="4">4</button>
+                  <button class="key-btn key-num" data-action="num" data-val="5">5</button>
+                  <button class="key-btn key-num" data-action="num" data-val="6">6</button>
+                  <button class="key-btn key-sign" data-action="set-sign" data-val="-">-</button>
+
+                  <!-- Fila 3: 1, 2, 3 y borrar ⌫ -->
+                  <button class="key-btn key-num" data-action="num" data-val="1">1</button>
+                  <button class="key-btn key-num" data-action="num" data-val="2">2</button>
+                  <button class="key-btn key-num" data-action="num" data-val="3">3</button>
+                  <button class="key-btn key-action key-backspace" data-action="backspace" title="Borrar último dígito">⌫</button>
+
+                  <!-- Fila 4: C (limpiar), 0 y ¡Comprobar! ✓ (ocupa 2 columnas) -->
+                  <button class="key-btn key-action key-clear" data-action="clear" title="Limpiar todo">C</button>
+                  <button class="key-btn key-num" data-action="num" data-val="0">0</button>
+                  <button class="key-btn key-submit" id="btn-submit-answer" data-action="submit">¡Comprobar! ✓</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Fase 3: Supresión de signos / Doble signo -->
-        <div class="interaction-phase hidden" id="phase-sign-rule">
-          <h3 class="phase-title">⚡ Ley de Signos / Supresión de Signo de Agrupación</h3>
-          <div class="sign-rule-arena">
-            <div class="sign-transform-box">
-              <span class="old-signs" id="sign-transform-before">- ( +5 )</span>
-              <span class="transform-arrow">➔</span>
-              <span class="new-sign-placeholder" id="sign-transform-after">? 5</span>
-            </div>
-            <p class="phase-desc" id="sign-rule-question">¿Qué signo resulta al multiplicar o suprimir los signos?</p>
-            <div class="sign-options-row">
-              <button class="clay-btn clay-btn-sign" data-sign="+">Signo Positivo (+)</button>
-              <button class="clay-btn clay-btn-sign" data-sign="-">Signo Negativo (-)</button>
+          <!-- Fase 3: Supresión de signos / Doble signo -->
+          <div class="interaction-phase hidden" id="phase-sign-rule">
+            <h3 class="phase-title">⚡ Ley de Signos / Supresión de Signo de Agrupación</h3>
+            <div class="sign-rule-arena">
+              <div class="sign-transform-box">
+                <span class="old-signs" id="sign-transform-before">- ( +5 )</span>
+                <span class="transform-arrow">➔</span>
+                <span class="new-sign-placeholder" id="sign-transform-after">? 5</span>
+              </div>
+              <p class="phase-desc" id="sign-rule-question">¿Qué signo resulta al multiplicar o suprimir los signos?</p>
+              <div class="sign-options-row">
+                <button class="clay-btn clay-btn-sign" data-sign="+">Signo Positivo (+)</button>
+                <button class="clay-btn clay-btn-sign" data-sign="-">Signo Negativo (-)</button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Mensaje de Feedback interactivo -->
-        <div class="feedback-banner hidden" id="feedback-message">
-          <div class="feedback-icon" id="feedback-icon">🎉</div>
-          <div class="feedback-text-wrap">
-            <h4 class="feedback-heading" id="feedback-heading">¡Excelente trabajo!</h4>
-            <p class="feedback-detail" id="feedback-detail">Has aplicado correctamente la regla de signos.</p>
+          <!-- Mensaje de Feedback interactivo -->
+          <div class="feedback-banner hidden" id="feedback-message">
+            <div class="feedback-icon" id="feedback-icon">🎉</div>
+            <div class="feedback-text-wrap">
+              <h4 class="feedback-heading" id="feedback-heading">¡Excelente trabajo!</h4>
+              <p class="feedback-detail" id="feedback-detail">Has aplicado correctamente la regla de signos.</p>
+            </div>
+            <button class="clay-btn clay-btn-emerald" id="btn-next-step">Continuar ➔</button>
           </div>
-          <button class="clay-btn clay-btn-emerald" id="btn-next-step">Continuar ➔</button>
-        </div>
 
-      </section>
+        </section>
 
-      <!-- Historial de pasos completados (Demostración didáctica) -->
-      <section class="clay-card steps-history-card">
-        <div class="history-header">
-          <h3>📝 Historial del desarrollo paso a paso:</h3>
-          <span class="history-badge">Demostración formal</span>
-        </div>
-        <div class="steps-list" id="steps-history-list">
-          <!-- Pasos se agregan aquí dinámicamente -->
-        </div>
-      </section>
+        <!-- Historial de pasos completados (Demostración didáctica, a la derecha de la calculadora) -->
+        <section class="clay-card steps-history-card" id="steps-history-card">
+          <div class="history-header">
+            <h3>📝 Historial del desarrollo paso a paso:</h3>
+            <span class="history-badge">Demostración formal</span>
+          </div>
+          <div class="steps-list" id="steps-history-list">
+            <!-- Pasos se agregan aquí dinámicamente -->
+          </div>
+        </section>
+
+      </div>
 
     </main>
 

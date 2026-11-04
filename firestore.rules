@@ -1,0 +1,72 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Función auxiliar para determinar si el usuario es el docente administrador
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.uid == 'IHTD7bDOqETqQgqJ0vpZLoViORB2' ||
+        (request.auth.token.email != null && request.auth.token.email == 'moz658@gmail.com') ||
+        exists(/databases/$(database)/documents/polyclay_admins/$(request.auth.uid))
+      );
+    }
+
+    // Colección de administradores docentes
+    match /polyclay_admins/{adminId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // Colección de evaluaciones e intentos de examen
+    match /polyclay_evaluations/{evaluationId} {
+      // Solo el docente autenticado puede consultar todas las evaluaciones y ver notas
+      allow read: if isAdmin();
+
+      // Los estudiantes pueden crear un intento completado con validación de integridad
+      allow create: if request.resource.data.keys().hasAll([
+          'attemptId', 'studentId', 'nombreCompleto', 'notaBase', 'notaFinal',
+          'erroresEfectivos', 'aciertos', 'fecha', 'intentoNumero'
+        ]) &&
+        request.resource.data.notaBase >= 1.0 && request.resource.data.notaBase <= 5.0 &&
+        request.resource.data.notaFinal >= 1.0 && request.resource.data.notaFinal <= 5.0 &&
+        request.resource.data.intentoNumero >= 1 && request.resource.data.intentoNumero <= 3 &&
+        request.resource.data.aciertos >= 0 && request.resource.data.aciertos <= 10 &&
+        request.resource.data.nombreCompleto is string &&
+        request.resource.data.nombreCompleto.size() >= 3;
+
+      // Las evaluaciones finalizadas son inmutables para los estudiantes; solo el docente puede gestionarlas
+      allow update, delete: if isAdmin();
+    }
+
+    // Colección de estudiantes (perfil de juego, puntos e inventario)
+    match /polyclay_students/{studentId} {
+      // El docente puede leer todos los estudiantes; para estudiantes se permite lectura de su perfil
+      allow read: if true;
+
+      // Creación o actualización controlada de puntos e inventario
+      allow create, update: if 
+        request.resource.data.puntos >= 0 &&
+        request.resource.data.escudosDisponibles >= 0 &&
+        request.resource.data.gemasObtenidas >= 0 &&
+        request.resource.data.decimasCanjeadas >= 0 &&
+        request.resource.data.decimasCanjeadas <= 2;
+
+      allow delete: if isAdmin();
+    }
+
+    // Registro de transacciones de recompensas y uso de escudos
+    match /polyclay_transactions/{transactionId} {
+      allow read: if isAdmin();
+      allow create: if request.resource.data.keys().hasAll([
+        'studentId', 'tipo', 'costo', 'fecha'
+      ]);
+      allow update, delete: if isAdmin();
+    }
+
+    // Proteger todas las demás colecciones existentes del proyecto
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

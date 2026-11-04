@@ -60,6 +60,10 @@
           🔊
         </button>
 
+        <button id="btn-store-modal" class="clay-btn clay-btn-amber" title="Tienda de Recompensas y Escudos">
+          🛒 Tienda
+        </button>
+
         <button id="btn-exam-mode" class="clay-btn clay-btn-rose" title="Iniciar Evaluación de 10 preguntas">
           📝 Modo Examen
         </button>
@@ -80,8 +84,18 @@
         <div class="exam-student-avatar">📝</div>
         <div class="exam-student-info">
           <h3 id="exam-banner-name">Estudiante: Nombre</h3>
-          <span class="exam-pill-attempt" id="exam-banner-attempt">Intento 1 de 3 • Escala 1.0 a 5.0</span>
+          <span class="exam-pill-attempt" id="exam-banner-attempt">Intento 1 de 3 • Escala Oficial 1.0 a 5.0</span>
         </div>
+      </div>
+
+      <!-- Indicadores en vivo de Escudos y Nota Provisional -->
+      <div class="exam-live-stats-bar">
+        <span class="exam-shield-pill active" id="exam-live-shields" title="Escudos protectores disponibles">
+          🛡️ <span id="exam-live-shields-count">1</span> Escudo(s)
+        </span>
+        <span class="exam-provisional-pill" id="exam-live-grade" title="Nota provisional actual (inicia en 5.0, -0.2 por error)">
+          Nota: <span id="exam-live-grade-val">5.0</span>
+        </span>
       </div>
 
       <div class="exam-questions-tracker">
@@ -267,6 +281,11 @@
       <p class="footer-note">
         Herramienta didáctica para 7° Grado • Aritmética de Números Enteros • Diseñado con estilo Claymorphism 3D
       </p>
+      <div style="margin-top: 0.35rem;">
+        <button id="btn-open-admin-panel" class="admin-footer-link">
+          🔐 Acceso Docente
+        </button>
+      </div>
     </footer>
   </div>
 
@@ -379,26 +398,32 @@
         
         <div class="exam-features-list">
           <div class="exam-feature-item">
-            <span class="icon">📋</span>
-            <span><strong>10 Preguntas guiadas</strong> que evalúan jerarquía, suma/resta de enteros y ley de signos.</span>
+            <span class="icon">⭐</span>
+            <span><strong>Nota Inicial de 5.0:</strong> Comienzas con la máxima nota. Cada error efectivo descuenta <strong>0.2 puntos</strong>.</span>
           </div>
           <div class="exam-feature-item">
-            <span class="icon">🎯</span>
-            <span><strong>Calificación de 1.0 a 5.0</strong> (Nota mínima de aprobación: 3.0).</span>
+            <span class="icon">🛡️</span>
+            <span><strong>Escudos Protectores:</strong> Neutralizan los errores y evitan que te descuenten décimas.</span>
+          </div>
+          <div class="exam-feature-item">
+            <span class="icon">💎</span>
+            <span><strong>Puntos & Recompensas:</strong> Ganas puntos al responder bien y puedes canjear hasta 2 décimas adicionales (+0.2 máx).</span>
           </div>
           <div class="exam-feature-item">
             <span class="icon">🔄</span>
-            <span><strong>3 Oportunidades:</strong> Puedes repetir el examen para mejorar tu nota. ¡Se guarda siempre tu mejor nota!</span>
-          </div>
-          <div class="exam-feature-item">
-            <span class="icon">🏆</span>
-            <span><strong>Tabla de Ranking:</strong> Tu puesto quedará registrado en el tablero del salón.</span>
+            <span><strong>3 Oportunidades:</strong> Presenta el examen hasta 3 veces. ¡Siempre conservaremos tu mejor calificación!</span>
           </div>
         </div>
 
-        <div class="custom-input-box">
-          <label for="exam-input-name">Nombre y Apellidos completos del Estudiante:</label>
-          <input type="text" id="exam-input-name" class="clay-text-input" placeholder="Ej: Santiago Andrés Morales Castro" autofocus autocomplete="name">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="custom-input-box">
+            <label for="exam-input-nombre">Nombre(s) del Estudiante: *</label>
+            <input type="text" id="exam-input-nombre" class="clay-text-input" placeholder="Ej: Santiago Andrés" autofocus autocomplete="given-name">
+          </div>
+          <div class="custom-input-box">
+            <label for="exam-input-apellido">Apellido(s) del Estudiante: *</label>
+            <input type="text" id="exam-input-apellido" class="clay-text-input" placeholder="Ej: Morales Castro" autocomplete="family-name">
+          </div>
         </div>
 
         <!-- Banner de detección si el estudiante ya tiene intentos previos -->
@@ -413,12 +438,85 @@
         </div>
 
         <div id="exam-register-error" class="clay-alert-error hidden">
-          Por favor ingresa tu nombre completo para poder registrar tu calificación.
+          Por favor ingresa tanto tu nombre como tu apellido para poder registrar tu evaluación.
         </div>
       </div>
       <div class="modal-footer">
         <button class="clay-btn clay-btn-outline" id="btn-exam-reg-ranking">🏆 Ver Ranking</button>
         <button class="clay-btn clay-btn-rose" id="btn-start-exam-confirm">🚀 Iniciar Intento 1 de 3</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Tienda de Recompensas e Inventario -->
+  <div class="clay-modal-overlay hidden" id="modal-rewards-store">
+    <div class="clay-modal" style="max-width: 680px;">
+      <div class="modal-header">
+        <h2>🛒 Tienda de Recompensas & Escudos</h2>
+        <button class="close-btn" id="btn-close-rewards-store">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Barra de Inventario del Estudiante -->
+        <div class="inventory-summary-bar">
+          <div class="inv-stat-item">
+            <span>⭐ Puntos:</span>
+            <span id="store-student-points" style="color: #D97706;">120</span>
+          </div>
+          <div class="inv-stat-item">
+            <span>🛡️ Escudos:</span>
+            <span id="store-student-shields" style="color: #2563EB;">1</span>
+          </div>
+          <div class="inv-stat-item">
+            <span>💎 Gemas:</span>
+            <span id="store-student-gems" style="color: #7C3AED;">0</span>
+          </div>
+        </div>
+
+        <p style="font-size: 0.9rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem;">
+          Acumula puntos respondiendo correctamente y prepárate con beneficios para tus evaluaciones.
+        </p>
+
+        <!-- Tarjetas de Recompensas -->
+        <div class="rewards-store-grid">
+          
+          <div class="reward-clay-card">
+            <div class="reward-card-icon icon-escudo">🛡️</div>
+            <h4 class="reward-card-title">Escudo Protector</h4>
+            <p class="reward-card-desc">Absorbe 1 error durante el examen, evitando el descuento de 0.2 puntos.</p>
+            <span class="reward-card-cost">60 Puntos</span>
+            <button class="clay-btn clay-btn-indigo" id="btn-buy-shield" style="width: 100%; margin-top: 0.4rem;">
+              Comprar Escudo 🛡️
+            </button>
+          </div>
+
+          <div class="reward-clay-card">
+            <div class="reward-card-icon icon-decima">⭐</div>
+            <h4 class="reward-card-title">Décima Adicional</h4>
+            <p class="reward-card-desc">Suma +0.1 a tu nota final. Se canjea en la pantalla de revisión de tu examen (máx 2).</p>
+            <span class="reward-card-cost">100 Puntos</span>
+            <span style="font-size: 0.8rem; color: #2563EB; font-weight: 700; margin-top: 0.4rem;">
+              Canjeable en el examen
+            </span>
+          </div>
+
+          <div class="reward-clay-card">
+            <div class="reward-card-icon icon-gema">💎</div>
+            <h4 class="reward-card-title">Gema del Saber</h4>
+            <p class="reward-card-desc">Insignia coleccionable que demuestra tu maestría en polinomios aritméticos.</p>
+            <span class="reward-card-cost">40 Puntos</span>
+            <button class="clay-btn clay-btn-amber" id="btn-buy-gem" style="width: 100%; margin-top: 0.4rem;">
+              Comprar Gema 💎
+            </button>
+          </div>
+
+        </div>
+
+        <div id="store-feedback-msg" class="clay-alert-error hidden" style="background: #EFF6FF; border-color: #93C5FD; color: #1E40AF;"></div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="clay-btn clay-btn-outline" id="btn-close-rewards-store-2">Cerrar</button>
       </div>
     </div>
   </div>
@@ -435,25 +533,46 @@
         <div class="exam-result-hero">
           <div class="score-clay-podium">
             <span class="grade-scale-text">Calificación Oficial</span>
-            <div class="grade-number-display" id="exam-final-grade">4.6</div>
-            <span class="grade-scale-text">Escala 1.0 a 5.0</span>
+            <div class="grade-number-display" id="exam-final-grade">5.0</div>
+            <span class="grade-scale-text">Escala Oficial 1.0 a 5.0</span>
             <div class="desempeno-badge desempeno-superior" id="exam-desempeno-badge">
               🌟 Desempeño Superior
             </div>
           </div>
 
+          <!-- Desglose de Notas y Escudos -->
           <div class="exam-stats-summary-grid">
             <div class="exam-stat-box">
-              <div class="stat-box-val" id="exam-stat-correct">8 / 10</div>
+              <div class="stat-box-val" id="exam-stat-base-grade">5.0</div>
+              <div class="stat-box-lbl">Nota Base Inicial</div>
+            </div>
+            <div class="exam-stat-box">
+              <div class="stat-box-val" id="exam-stat-correct">10 / 10</div>
               <div class="stat-box-lbl">Preguntas Acertadas</div>
             </div>
             <div class="exam-stat-box">
-              <div class="stat-box-val" id="exam-stat-attempt">Intento 1 de 3</div>
-              <div class="stat-box-lbl">Oportunidades Usadas</div>
+              <div class="stat-box-val" id="exam-stat-errors">0</div>
+              <div class="stat-box-lbl">Errores Efectivos</div>
             </div>
             <div class="exam-stat-box">
-              <div class="stat-box-val" id="exam-stat-best">4.6 / 5.0</div>
-              <div class="stat-box-lbl">Mejor Nota Registrada</div>
+              <div class="stat-box-val" id="exam-stat-shields">0</div>
+              <div class="stat-box-lbl">Escudos Usados</div>
+            </div>
+          </div>
+
+          <!-- Sección de Canje de Décimas Adicionales antes de Confirmar -->
+          <div class="retry-opportunity-card" id="exam-redeem-decimas-card" style="background: #EFF6FF; border-color: #93C5FD;">
+            <h4 style="color: #1E40AF;">⭐ Canjear Décimas Adicionales</h4>
+            <p style="color: #1E3A8A;" id="exam-redeem-decimas-desc">
+              Puedes canjear hasta 2 décimas adicionales (+0.1 c/u) usando tus puntos (100 pts c/u).
+            </p>
+            <div style="display: flex; gap: 0.5rem; justify-content: center; align-items: center; margin-top: 0.35rem;">
+              <button class="clay-btn clay-btn-indigo" id="btn-exam-redeem-tenth">
+                ⭐ Canjear +0.1 (100 Puntos)
+              </button>
+              <span id="exam-redeemed-count-badge" style="font-size: 0.85rem; font-weight: 700; color: #2563EB;">
+                Canjeadas: 0 / 2
+              </span>
             </div>
           </div>
 
@@ -530,13 +649,219 @@
     </div>
   </div>
 
+  <!-- MODAL: Panel Privado y Administrativo del Docente -->
+  <div class="clay-modal-overlay hidden" id="modal-admin-panel">
+    <div class="clay-modal" style="max-width: 950px;">
+      <div class="modal-header">
+        <h2>🔐 Panel Privado del Docente — PolyClay</h2>
+        <button class="close-btn" id="btn-close-admin-panel">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Sección de Autenticación con Google (Visible si no está autenticado) -->
+        <div id="admin-auth-section" style="text-align: center; padding: 2rem 1rem;">
+          <div class="modal-welcome-icon">🔒</div>
+          <h3 style="font-family: 'Fredoka', cursive; font-size: 1.4rem; color: #7C3AED; margin-bottom: 0.5rem;">
+            Acceso Exclusivo para el Docente
+          </h3>
+          <p style="color: var(--text-muted); max-width: 480px; margin: 0 auto 1.5rem auto;">
+            Inicia sesión con tu cuenta de Google autorizada para consultar el registro confidencial de notas, métricas y exportación oficial de calificaciones.
+          </p>
+
+          <button id="btn-admin-login-google" class="clay-btn clay-btn-indigo" style="font-size: 1.1rem; padding: 0.85rem 1.8rem;">
+            <span>G</span> Iniciar Sesión con Google
+          </button>
+
+          <div id="admin-auth-error" class="clay-alert-error hidden" style="max-width: 480px; margin: 1rem auto 0 auto;"></div>
+        </div>
+
+        <!-- Sección de Dashboard Administrativo (Visible solo para el docente autenticado) -->
+        <div id="admin-dashboard-section" class="hidden">
+          
+          <!-- Encabezado del Docente -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #F1F5F9; padding-bottom: 0.85rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <span style="font-size: 0.82rem; font-weight: 800; color: #059669; background: #D1FAE5; padding: 0.2rem 0.6rem; border-radius: 999px;">
+                ● DOCENTE AUTENTICADO
+              </span>
+              <h3 id="admin-teacher-name" style="font-family: 'Fredoka', cursive; font-size: 1.25rem; color: var(--text-dark); margin-top: 0.2rem;">
+                Docente
+              </h3>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button id="btn-admin-refresh" class="clay-btn clay-btn-outline" style="font-size: 0.85rem; padding: 0.45rem 0.85rem;">
+                🔄 Actualizar
+              </button>
+              <button id="btn-admin-logout" class="clay-btn clay-btn-outline" style="font-size: 0.85rem; padding: 0.45rem 0.85rem; color: #BE123C;">
+                Cerrar Sesión
+              </button>
+            </div>
+          </div>
+
+          <!-- Métricas Estadísticas del Salón -->
+          <div class="admin-metrics-row">
+            <div class="admin-metric-card">
+              <div class="admin-metric-val" id="admin-stat-total-students">0</div>
+              <div class="admin-metric-lbl">Estudiantes</div>
+            </div>
+            <div class="admin-metric-card">
+              <div class="admin-metric-val" id="admin-stat-total-exams">0</div>
+              <div class="admin-metric-lbl">Exámenes</div>
+            </div>
+            <div class="admin-metric-card">
+              <div class="admin-metric-val" id="admin-stat-average-grade" style="color: #059669;">0.0</div>
+              <div class="admin-metric-lbl">Promedio General</div>
+            </div>
+            <div class="admin-metric-card">
+              <div class="admin-metric-val" id="admin-stat-highest-grade" style="color: #2563EB;">5.0</div>
+              <div class="admin-metric-lbl">Nota Más Alta</div>
+            </div>
+            <div class="admin-metric-card">
+              <div class="admin-metric-val" id="admin-stat-lowest-grade" style="color: #E11D48;">1.0</div>
+              <div class="admin-metric-lbl">Nota Más Baja</div>
+            </div>
+          </div>
+
+          <!-- Distribución de Calificaciones -->
+          <div class="distribution-container">
+            <h4 style="font-family: 'Fredoka', cursive; font-size: 1.05rem; color: var(--text-dark); margin-bottom: 0.75rem;">
+              📊 Distribución de Desempeño Académico
+            </h4>
+            
+            <div class="dist-bar-item">
+              <div class="dist-bar-header">
+                <span style="color: #065F46;">Superior (4.6 - 5.0)</span>
+                <span id="dist-count-superior">0 (0%)</span>
+              </div>
+              <div class="dist-bar-track">
+                <div class="dist-bar-fill fill-superior" id="dist-bar-superior" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="dist-bar-item">
+              <div class="dist-bar-header">
+                <span style="color: #1E40AF;">Alto (4.0 - 4.5)</span>
+                <span id="dist-count-alto">0 (0%)</span>
+              </div>
+              <div class="dist-bar-track">
+                <div class="dist-bar-fill fill-alto" id="dist-bar-alto" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="dist-bar-item">
+              <div class="dist-bar-header">
+                <span style="color: #92400E;">Básico (3.0 - 3.9)</span>
+                <span id="dist-count-basico">0 (0%)</span>
+              </div>
+              <div class="dist-bar-track">
+                <div class="dist-bar-fill fill-basico" id="dist-bar-basico" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="dist-bar-item">
+              <div class="dist-bar-header">
+                <span style="color: #9F1239;">Bajo (1.0 - 2.9)</span>
+                <span id="dist-count-bajo">0 (0%)</span>
+              </div>
+              <div class="dist-bar-track">
+                <div class="dist-bar-fill fill-bajo" id="dist-bar-bajo" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtros y Exportación -->
+          <div class="ranking-controls-bar" style="margin-bottom: 0.85rem;">
+            <div style="flex: 2; min-width: 220px;">
+              <input type="text" id="admin-search-student" class="clay-text-input" placeholder="🔍 Buscar estudiante por nombre o apellido..." style="font-size: 0.95rem; padding: 0.55rem 0.85rem;">
+            </div>
+            <div style="flex: 1; min-width: 160px;">
+              <select id="admin-filter-desempeno" class="clay-text-input" style="font-size: 0.9rem; padding: 0.55rem 0.85rem; font-family: 'Fredoka', cursive;">
+                <option value="TODOS">Todos los desempeños</option>
+                <option value="SUPERIOR">Superior (4.6 - 5.0)</option>
+                <option value="ALTO">Alto (4.0 - 4.5)</option>
+                <option value="BASICO">Básico (3.0 - 3.9)</option>
+                <option value="BAJO">Bajo (1.0 - 2.9)</option>
+              </select>
+            </div>
+            <button id="btn-admin-export-csv" class="clay-btn clay-btn-emerald" style="font-size: 0.9rem;">
+              📥 Exportar a Excel (CSV)
+            </button>
+          </div>
+
+          <!-- Tabla Completa de Evaluaciones -->
+          <div class="ranking-table-container">
+            <table class="ranking-table">
+              <thead>
+                <tr>
+                  <th>Estudiante</th>
+                  <th>Fecha</th>
+                  <th style="text-align: center;">Intento</th>
+                  <th style="text-align: center;">Aciertos</th>
+                  <th style="text-align: center;">Errores</th>
+                  <th style="text-align: center;">Nota Base</th>
+                  <th style="text-align: center;">Décimas</th>
+                  <th style="text-align: center;">Nota Final</th>
+                  <th style="text-align: center;">Detalle</th>
+                </tr>
+              </thead>
+              <tbody id="admin-evaluations-tbody">
+                <!-- Filas renderizadas por AdminPanel -->
+              </tbody>
+            </table>
+            <div class="ranking-empty-state hidden" id="admin-table-empty">
+              <span class="ranking-empty-icon">📊</span>
+              <h3>No se encontraron evaluaciones registradas</h3>
+              <p>Los exámenes finalizados aparecerán automáticamente aquí.</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="clay-btn clay-btn-outline" id="btn-close-admin-panel-2">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Detalle Individual del Estudiante -->
+  <div class="clay-modal-overlay hidden" id="modal-student-detail">
+    <div class="clay-modal" style="max-width: 650px;">
+      <div class="modal-header">
+        <div>
+          <h2 id="detail-student-name">Detalle del Estudiante</h2>
+          <span id="detail-student-meta" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;"></span>
+        </div>
+        <button class="close-btn" id="btn-close-student-detail">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="detail-attempts-list">
+          <!-- Tarjetas de cada intento del estudiante -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="clay-btn clay-btn-outline" onclick="document.getElementById('modal-student-detail').classList.add('hidden')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Contenedor para Confetti Canvas -->
   <canvas id="confetti-canvas"></canvas>
 
-  <!-- Scripts -->
+  <!-- SDKs de Firebase Compat (Compatibles 100% con GitHub Pages) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <!-- Scripts Modulares del Juego -->
   <script src="js/audio.js"></script>
   <script src="js/engine.js"></script>
   <script src="js/levels.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/eval-engine.js"></script>
+  <script src="js/admin-panel.js"></script>
   <script src="js/app.js"></script>
+</body>
+</html>
 </body>
 </html>

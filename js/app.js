@@ -25,15 +25,18 @@ class PolyClayApp {
     this.inputSign = '';
     this.inputNum = '';
 
-    // Estado de Modo Examen
+    // Estado de Modo Examen y Evaluación Gamificada
     this.isExamMode = false;
     this.examStudentName = '';
+    this.examStudentNombre = '';
+    this.examStudentApellido = '';
     this.examCurrentAttempt = 1; // 1, 2 o 3
     this.examCurrentQuestionIdx = 0; // 0 a 9
     this.examQuestions = [];
     this.examQuestionErrors = 0;
     this.examAciertos = 0;
     this.examQuestionResults = [];
+    this.evalEngine = typeof EvaluationEngine !== 'undefined' ? new EvaluationEngine() : null;
 
     // Inicializar referencias DOM y eventos
     this.cacheDom();
@@ -56,11 +59,13 @@ class PolyClayApp {
     // Navegación de niveles
     this.levelsContainer = document.getElementById('levels-container');
 
-    // Banner activo de Modo Examen
+    // Banner activo de Modo Examen y estadísticas en vivo
     this.examActiveBanner = document.getElementById('exam-active-banner');
     this.examBannerName = document.getElementById('exam-banner-name');
     this.examBannerAttempt = document.getElementById('exam-banner-attempt');
     this.examDotsContainer = document.getElementById('exam-dots-container');
+    this.examLiveShieldsCount = document.getElementById('exam-live-shields-count');
+    this.examLiveGradeVal = document.getElementById('exam-live-grade-val');
     this.btnExamExit = document.getElementById('btn-exam-exit');
 
     // Guía del robot
@@ -120,10 +125,23 @@ class PolyClayApp {
     this.btnRandomExercise = document.getElementById('btn-random-exercise');
     this.btnResetCurrent = document.getElementById('btn-reset-current');
 
+    // Tienda de Recompensas y Escudos
+    this.btnStoreModal = document.getElementById('btn-store-modal');
+    this.modalRewardsStore = document.getElementById('modal-rewards-store');
+    this.btnCloseRewardsStore = document.getElementById('btn-close-rewards-store');
+    this.btnCloseRewardsStore2 = document.getElementById('btn-close-rewards-store-2');
+    this.storeStudentPoints = document.getElementById('store-student-points');
+    this.storeStudentShields = document.getElementById('store-student-shields');
+    this.storeStudentGems = document.getElementById('store-student-gems');
+    this.btnBuyShield = document.getElementById('btn-buy-shield');
+    this.btnBuyGem = document.getElementById('btn-buy-gem');
+    this.storeFeedbackMsg = document.getElementById('store-feedback-msg');
+
     // Modales de Examen y Ranking
     this.modalExamRegister = document.getElementById('modal-exam-register');
     this.btnCloseExamRegister = document.getElementById('btn-close-exam-register');
-    this.examInputName = document.getElementById('exam-input-name');
+    this.examInputNombre = document.getElementById('exam-input-nombre');
+    this.examInputApellido = document.getElementById('exam-input-apellido');
     this.examStudentHistoryBanner = document.getElementById('exam-student-history-banner');
     this.examHistoryGreeting = document.getElementById('exam-history-greeting');
     this.examHistoryDetail = document.getElementById('exam-history-detail');
@@ -135,9 +153,15 @@ class PolyClayApp {
     this.btnCloseExamResults = document.getElementById('btn-close-exam-results');
     this.examFinalGrade = document.getElementById('exam-final-grade');
     this.examDesempenoBadge = document.getElementById('exam-desempeno-badge');
+    this.examStatBaseGrade = document.getElementById('exam-stat-base-grade');
+    this.examStatErrors = document.getElementById('exam-stat-errors');
+    this.examStatShields = document.getElementById('exam-stat-shields');
     this.examStatCorrect = document.getElementById('exam-stat-correct');
     this.examStatAttempt = document.getElementById('exam-stat-attempt');
     this.examStatBest = document.getElementById('exam-stat-best');
+    this.btnExamRedeemTenth = document.getElementById('btn-exam-redeem-tenth');
+    this.examRedeemedCountBadge = document.getElementById('exam-redeemed-count-badge');
+    this.examSaveCloudStatus = document.getElementById('exam-save-cloud-status');
     this.examRetryCard = document.getElementById('exam-retry-card');
     this.examRetryHeading = document.getElementById('exam-retry-heading');
     this.examRetryText = document.getElementById('exam-retry-text');
@@ -178,6 +202,34 @@ class PolyClayApp {
       this.modalRules.classList.add('hidden');
     });
 
+    // Tienda de Recompensas
+    if (this.btnStoreModal) {
+      this.btnStoreModal.addEventListener('click', () => {
+        this.sound.playClick();
+        this.openRewardsStore();
+      });
+    }
+    if (this.btnCloseRewardsStore) {
+      this.btnCloseRewardsStore.addEventListener('click', () => {
+        this.modalRewardsStore.classList.add('hidden');
+      });
+    }
+    if (this.btnCloseRewardsStore2) {
+      this.btnCloseRewardsStore2.addEventListener('click', () => {
+        this.modalRewardsStore.classList.add('hidden');
+      });
+    }
+    if (this.btnBuyShield) {
+      this.btnBuyShield.addEventListener('click', () => {
+        this.buyReward('escudo');
+      });
+    }
+    if (this.btnBuyGem) {
+      this.btnBuyGem.addEventListener('click', () => {
+        this.buyReward('gema');
+      });
+    }
+
     // Modal de Modo Examen: Botones de apertura
     this.btnExamMode.addEventListener('click', () => {
       this.sound.playClick();
@@ -188,10 +240,17 @@ class PolyClayApp {
       this.modalExamRegister.classList.add('hidden');
     });
 
-    // Chequeo en tiempo real al escribir el nombre del estudiante
-    this.examInputName.addEventListener('input', () => {
-      this.checkStudentHistoryPreview();
-    });
+    // Chequeo en tiempo real al escribir nombre o apellido del estudiante
+    if (this.examInputNombre) {
+      this.examInputNombre.addEventListener('input', () => {
+        this.checkStudentHistoryPreview();
+      });
+    }
+    if (this.examInputApellido) {
+      this.examInputApellido.addEventListener('input', () => {
+        this.checkStudentHistoryPreview();
+      });
+    }
 
     this.btnStartExamConfirm.addEventListener('click', () => {
       this.startExamSession();
@@ -447,30 +506,126 @@ class PolyClayApp {
   }
 
   // ==========================================================================
-  // LÓGICA DE MODO EXAMEN (10 PREGUNTAS, ESCALA 1 A 5, 3 OPORTUNIDADES)
+  // TIENDA DE RECOMPENSAS Y ECONOMÍA DE PUNTOS
+  // ==========================================================================
+
+  openRewardsStore() {
+    const studentId = this.examStudentNombre && this.examStudentApellido
+      ? EvaluationEngine.generateStudentId(this.examStudentNombre, this.examStudentApellido)
+      : 'std_jugador_local';
+
+    const inv = EvaluationEngine.getInventory(studentId);
+    if (this.storeStudentPoints) this.storeStudentPoints.textContent = inv.puntos;
+    if (this.storeStudentShields) this.storeStudentShields.textContent = inv.escudosDisponibles || 0;
+    if (this.storeStudentGems) this.storeStudentGems.textContent = inv.gemasObtenidas || 0;
+    if (this.storeFeedbackMsg) this.storeFeedbackMsg.classList.add('hidden');
+
+    if (this.modalRewardsStore) {
+      this.modalRewardsStore.classList.remove('hidden');
+    }
+  }
+
+  buyReward(rewardType) {
+    const studentId = this.examStudentNombre && this.examStudentApellido
+      ? EvaluationEngine.generateStudentId(this.examStudentNombre, this.examStudentApellido)
+      : 'std_jugador_local';
+
+    const result = EvaluationEngine.purchaseReward(studentId, rewardType);
+    if (result.success) {
+      this.sound.playSuccess();
+      if (this.storeFeedbackMsg) {
+        this.storeFeedbackMsg.textContent = `¡Excelente! Compraste ${result.reward.name} ${result.reward.icon}`;
+        this.storeFeedbackMsg.className = 'clay-alert-error';
+        this.storeFeedbackMsg.style.background = '#ECFDF5';
+        this.storeFeedbackMsg.style.borderColor = '#6EE7B7';
+        this.storeFeedbackMsg.style.color = '#065F46';
+        this.storeFeedbackMsg.classList.remove('hidden');
+      }
+      if (this.storeStudentPoints) this.storeStudentPoints.textContent = result.inventory.puntos;
+      if (this.storeStudentShields) this.storeStudentShields.textContent = result.inventory.escudosDisponibles;
+      if (this.storeStudentGems) this.storeStudentGems.textContent = result.inventory.gemasObtenidas;
+
+      // Actualizar puntos de la barra superior
+      this.score = result.inventory.puntos;
+      if (this.scoreCountEl) this.scoreCountEl.textContent = this.score;
+
+      // Si está en examen activo, actualizar escudos disponibles
+      if (this.isExamMode && this.evalEngine && this.evalEngine.currentSession) {
+        this.evalEngine.currentSession.escudosDisponiblesActuales = result.inventory.escudosDisponibles;
+        this.updateLiveExamStats();
+      }
+    } else {
+      this.sound.playError();
+      if (this.storeFeedbackMsg) {
+        this.storeFeedbackMsg.textContent = result.message;
+        this.storeFeedbackMsg.className = 'clay-alert-error';
+        this.storeFeedbackMsg.style.background = '#FEF2F2';
+        this.storeFeedbackMsg.style.borderColor = '#FCA5A5';
+        this.storeFeedbackMsg.style.color = '#991B1B';
+        this.storeFeedbackMsg.classList.remove('hidden');
+      }
+    }
+  }
+
+  updateLiveExamStats() {
+    if (!this.isExamMode || !this.evalEngine || !this.evalEngine.currentSession) return;
+    if (this.examLiveShieldsCount) {
+      this.examLiveShieldsCount.textContent = this.evalEngine.currentSession.escudosDisponiblesActuales;
+    }
+    if (this.examLiveGradeVal) {
+      this.examLiveGradeVal.textContent = this.evalEngine.getProvisionalBaseGrade().toFixed(1);
+    }
+  }
+
+  updateDesempenoBadge(grade) {
+    if (!this.examDesempenoBadge) return;
+    this.examDesempenoBadge.className = 'desempeno-badge';
+    if (grade >= 4.6) {
+      this.examDesempenoBadge.classList.add('desempeno-superior');
+      this.examDesempenoBadge.innerHTML = '🌟 Desempeño Superior';
+    } else if (grade >= 4.0) {
+      this.examDesempenoBadge.classList.add('desempeno-alto');
+      this.examDesempenoBadge.innerHTML = '👏 Desempeño Alto';
+    } else if (grade >= 3.0) {
+      this.examDesempenoBadge.classList.add('desempeno-basico');
+      this.examDesempenoBadge.innerHTML = '👍 Desempeño Básico';
+    } else {
+      this.examDesempenoBadge.classList.add('desempeno-bajo');
+      this.examDesempenoBadge.innerHTML = '⚠️ Desempeño Bajo';
+    }
+  }
+
+  // ==========================================================================
+  // LÓGICA DE MODO EXAMEN GAMIFICADO (10 PREGUNTAS, NOTA 5.0 - ERRORES * 0.2, 3 OPORTUNIDADES)
   // ==========================================================================
 
   openExamRegisterModal() {
     this.modalExamRegister.classList.remove('hidden');
     this.examRegisterError.classList.add('hidden');
     
-    // Si ya había ingresado su nombre, precargarlo
-    if (this.examStudentName) {
-      this.examInputName.value = this.examStudentName;
+    // Si ya había ingresado datos, precargarlos
+    if (this.examStudentNombre && this.examInputNombre) {
+      this.examInputNombre.value = this.examStudentNombre;
+    }
+    if (this.examStudentApellido && this.examInputApellido) {
+      this.examInputApellido.value = this.examStudentApellido;
     }
     this.checkStudentHistoryPreview();
-    this.examInputName.focus();
+    if (this.examInputNombre) this.examInputNombre.focus();
   }
 
   checkStudentHistoryPreview() {
-    const val = this.examInputName.value.trim();
-    if (!val) {
+    const nom = this.examInputNombre ? this.examInputNombre.value.trim() : '';
+    const ape = this.examInputApellido ? this.examInputApellido.value.trim() : '';
+
+    if (!nom && !ape) {
       this.examStudentHistoryBanner.classList.add('hidden');
       this.btnStartExamConfirm.textContent = '🚀 Iniciar Intento 1 de 3';
       return;
     }
 
-    const existing = RankingManager.getStudent(val);
+    const fullName = `${nom} ${ape}`.trim();
+    const existing = RankingManager.getStudent(fullName);
     if (existing) {
       this.examStudentHistoryBanner.classList.remove('hidden');
       this.examHistoryGreeting.textContent = `¡Hola de nuevo, ${existing.name}!`;
@@ -494,17 +649,19 @@ class PolyClayApp {
   }
 
   startExamSession() {
-    const rawName = this.examInputName.value.trim();
-    if (rawName.length < 3) {
-      this.examRegisterError.textContent = 'Por favor escribe tu nombre y apellido completo.';
+    const nom = this.examInputNombre ? this.examInputNombre.value.trim() : '';
+    const ape = this.examInputApellido ? this.examInputApellido.value.trim() : '';
+
+    if (nom.length < 2 || ape.length < 2) {
+      this.examRegisterError.textContent = 'Por favor escribe tu Nombre y tu Apellido (ambos campos son obligatorios).';
       this.examRegisterError.classList.remove('hidden');
       this.sound.playError();
       return;
     }
 
-    const existing = RankingManager.getStudent(rawName);
+    const fullName = `${nom} ${ape}`;
+    const existing = RankingManager.getStudent(fullName);
     if (existing && existing.attemptsCount >= 3) {
-      // Ya agotó sus 3 oportunidades
       alert(`Hola ${existing.name}, ya has presentado tus 3 oportunidades reglamentarias. Tu nota definitiva registrada es ${existing.bestGrade.toFixed(1)} / 5.0.`);
       this.modalExamRegister.classList.add('hidden');
       this.openRankingModal(existing.name);
@@ -516,22 +673,34 @@ class PolyClayApp {
       attemptNum = (existing.attemptsCount || 0) + 1;
     }
 
-    this.examStudentName = rawName;
+    this.examStudentNombre = nom;
+    this.examStudentApellido = ape;
+    this.examStudentName = fullName;
     this.examCurrentAttempt = attemptNum;
+
+    // Inicializar sesión en el motor de evaluación oficial
+    if (this.evalEngine) {
+      this.evalEngine.startExamSession(nom, ape, attemptNum);
+    }
+
     this.launchExamAttempt(attemptNum);
   }
 
   retryExamAttempt() {
-    const existing = RankingManager.getStudent(this.examStudentName);
-    const nextAttempt = existing ? existing.attemptsCount + 1 : this.examCurrentAttempt + 1;
+    const fullName = this.examStudentName || `${this.examStudentNombre} ${this.examStudentApellido}`.trim();
+    const existing = RankingManager.getStudent(fullName);
+    const nextAttempt = existing ? (existing.attemptsCount || 1) + 1 : this.examCurrentAttempt + 1;
 
     if (nextAttempt > 3) {
       alert('Has alcanzado el límite máximo de 3 oportunidades.');
-      this.openRankingModal(this.examStudentName);
+      this.openRankingModal(fullName);
       return;
     }
 
     this.examCurrentAttempt = nextAttempt;
+    if (this.evalEngine) {
+      this.evalEngine.startExamSession(this.examStudentNombre, this.examStudentApellido, nextAttempt);
+    }
     this.launchExamAttempt(nextAttempt);
   }
 
@@ -553,7 +722,10 @@ class PolyClayApp {
     // Actualizar banner superior de examen
     this.examActiveBanner.classList.remove('hidden');
     this.examBannerName.textContent = `Estudiante: ${this.examStudentName}`;
-    this.examBannerAttempt.textContent = `Intento ${attemptNum} de 3 • Escala Oficial 1.0 a 5.0`;
+    this.examBannerAttempt.textContent = `Intento ${attemptNum} de 3 • Nota Base 5.0`;
+
+    // Actualizar contadores en vivo
+    this.updateLiveExamStats();
 
     this.renderExamDots();
     this.renderLevelSelector();
@@ -598,6 +770,7 @@ class PolyClayApp {
 
     this.renderExamDots();
     this.updateStepsHistoryDisplay();
+    this.updateLiveExamStats();
     this.processCurrentExpressionState();
   }
 
@@ -618,47 +791,156 @@ class PolyClayApp {
     this.renderExamDots();
   }
 
+  setupTenthRedemption(finalResult, studentData) {
+    if (!this.btnExamRedeemTenth) return;
+
+    const refreshTenthUI = () => {
+      const inv = EvaluationEngine.getInventory(finalResult.studentId);
+      const decimas = this.evalEngine && this.evalEngine.currentSession
+        ? this.evalEngine.currentSession.decimasCanjeadasEnExamen
+        : 0;
+
+      if (this.examRedeemedCountBadge) {
+        this.examRedeemedCountBadge.textContent = `Canjeadas: ${decimas} / 2 (+${(decimas * 0.1).toFixed(1)})`;
+      }
+
+      if (decimas >= 2) {
+        this.btnExamRedeemTenth.disabled = true;
+        this.btnExamRedeemTenth.classList.add('disabled');
+        this.btnExamRedeemTenth.textContent = '⭐ Límite de 2 décimas alcanzado';
+      } else if (finalResult.notaFinal >= 5.0) {
+        this.btnExamRedeemTenth.disabled = true;
+        this.btnExamRedeemTenth.classList.add('disabled');
+        this.btnExamRedeemTenth.textContent = '⭐ Ya tienes la nota máxima (5.0)';
+      } else if (inv.puntos < 100) {
+        this.btnExamRedeemTenth.disabled = true;
+        this.btnExamRedeemTenth.classList.add('disabled');
+        this.btnExamRedeemTenth.textContent = `⭐ Canjear +0.1 (Tienes ${inv.puntos} de 100 pts)`;
+      } else {
+        this.btnExamRedeemTenth.disabled = false;
+        this.btnExamRedeemTenth.classList.remove('disabled');
+        this.btnExamRedeemTenth.textContent = `⭐ Canjear +0.1 (100 Puntos - Tienes ${inv.puntos} pts)`;
+      }
+    };
+
+    refreshTenthUI();
+
+    this.btnExamRedeemTenth.onclick = () => {
+      if (!this.evalEngine) return;
+      const res = this.evalEngine.redeemAdditionalTenth();
+      if (res.success) {
+        this.sound.playSuccess();
+        const newFinalGrade = Number(Math.min(5.0, finalResult.notaBase + (res.decimasCanjeadas * 0.1)).toFixed(1));
+        finalResult.notaFinal = newFinalGrade;
+        finalResult.decimasCanjeadas = res.decimasCanjeadas;
+        this.examFinalGrade.textContent = newFinalGrade.toFixed(1);
+        this.updateDesempenoBadge(newFinalGrade);
+
+        // Actualizar ranking local y Firestore
+        const updatedStudent = RankingManager.saveAttempt(
+          this.examStudentName,
+          newFinalGrade,
+          finalResult.aciertos,
+          this.examCurrentAttempt
+        );
+        this.examStatBest.textContent = `${updatedStudent.bestGrade.toFixed(1)} / 5.0`;
+
+        if (window.FirebaseService) {
+          window.FirebaseService.saveEvaluation(finalResult);
+        }
+
+        refreshTenthUI();
+      } else {
+        this.sound.playError();
+        alert(res.message);
+      }
+    };
+  }
+
   finishExamSession() {
     this.sound.playFanfare();
     this.triggerConfetti();
 
-    // Cálculo oficial de la nota en escala de 1.0 a 5.0:
-    // 0 aciertos = 1.0, 10 aciertos = 5.0 -> Nota = 1.0 + (aciertos / 10) * 4.0
-    const finalGrade = Number((1.0 + (this.examAciertos / 10) * 4.0).toFixed(1));
+    // Consolidar calificación mediante el motor de evaluación oficial
+    let finalResult = null;
+    if (this.evalEngine) {
+      finalResult = this.evalEngine.finalizeExam();
+    }
 
-    // Guardar o actualizar en el Ranking persistente
+    if (!finalResult) {
+      // Fallback de contingencia si no se hubiera iniciado sesión formal
+      const defErr = (10 - this.examAciertos) * 2;
+      const calcBase = Math.max(1.0, 5.0 - (defErr * 0.2));
+      finalResult = {
+        studentId: EvaluationEngine.generateStudentId(this.examStudentNombre || 'Estudiante', this.examStudentApellido || '7mo'),
+        nombreCompleto: this.examStudentName || 'Estudiante 7mo',
+        notaBase: Number(calcBase.toFixed(1)),
+        notaFinal: Number(calcBase.toFixed(1)),
+        erroresEfectivos: defErr,
+        erroresCometidosTotal: defErr,
+        escudosUsados: 0,
+        decimasCanjeadas: 0,
+        aciertos: this.examAciertos,
+        totalPreguntas: 10,
+        puntosGanados: 100
+      };
+    }
+
+    // Guardar o actualizar en el Ranking local persistente
     const studentData = RankingManager.saveAttempt(
       this.examStudentName,
-      finalGrade,
-      this.examAciertos,
+      finalResult.notaFinal,
+      finalResult.aciertos,
       this.examCurrentAttempt
     );
 
-    // Salir del modo de juego de examen
+    // Salir del modo de juego de examen en la pizarra
     this.isExamMode = false;
     this.examActiveBanner.classList.add('hidden');
     this.renderLevelSelector();
 
     // Actualizar datos del modal de resultados
-    this.examFinalGrade.textContent = finalGrade.toFixed(1);
-    this.examStatCorrect.textContent = `${this.examAciertos} / 10`;
-    this.examStatAttempt.textContent = `Intento ${this.examCurrentAttempt} de 3`;
-    this.examStatBest.textContent = `${studentData.bestGrade.toFixed(1)} / 5.0`;
+    this.examFinalGrade.textContent = finalResult.notaFinal.toFixed(1);
+    if (this.examStatBaseGrade) this.examStatBaseGrade.textContent = finalResult.notaBase.toFixed(1);
+    if (this.examStatCorrect) this.examStatCorrect.textContent = `${finalResult.aciertos} / 10`;
+    if (this.examStatErrors) this.examStatErrors.textContent = `${finalResult.erroresEfectivos} (-${(finalResult.erroresEfectivos * 0.2).toFixed(1)})`;
+    if (this.examStatShields) this.examStatShields.textContent = `${finalResult.escudosUsados} activo(s)`;
+    if (this.examStatAttempt) this.examStatAttempt.textContent = `Intento ${this.examCurrentAttempt} de 3`;
+    if (this.examStatBest) this.examStatBest.textContent = `${studentData.bestGrade.toFixed(1)} / 5.0`;
 
-    // Desempeño pedagógico
-    this.examDesempenoBadge.className = 'desempeno-badge';
-    if (finalGrade >= 4.6) {
-      this.examDesempenoBadge.classList.add('desempeno-superior');
-      this.examDesempenoBadge.innerHTML = '🌟 Desempeño Superior';
-    } else if (finalGrade >= 4.0) {
-      this.examDesempenoBadge.classList.add('desempeno-alto');
-      this.examDesempenoBadge.innerHTML = '👏 Desempeño Alto';
-    } else if (finalGrade >= 3.0) {
-      this.examDesempenoBadge.classList.add('desempeno-basico');
-      this.examDesempenoBadge.innerHTML = '👍 Desempeño Básico';
-    } else {
-      this.examDesempenoBadge.classList.add('desempeno-bajo');
-      this.examDesempenoBadge.innerHTML = '⚠️ Desempeño Bajo';
+    // Actualizar puntos de la barra general
+    const inv = EvaluationEngine.getInventory(finalResult.studentId);
+    this.score = inv.puntos;
+    if (this.scoreCountEl) this.scoreCountEl.textContent = this.score;
+
+    // Actualizar badge de desempeño pedagógico
+    this.updateDesempenoBadge(finalResult.notaFinal);
+
+    // Configurar canje de décimas
+    this.setupTenthRedemption(finalResult, studentData);
+
+    // Sincronizar con Firebase Firestore
+    if (this.examSaveCloudStatus) {
+      this.examSaveCloudStatus.textContent = '☁️ Sincronizando calificación con el panel del docente...';
+      this.examSaveCloudStatus.style.color = '#2563EB';
+    }
+    if (window.FirebaseService) {
+      window.FirebaseService.saveEvaluation(finalResult).then(res => {
+        if (this.examSaveCloudStatus) {
+          if (res && res.success) {
+            this.examSaveCloudStatus.textContent = '☁️ Calificación sincronizada con el panel docente';
+            this.examSaveCloudStatus.style.color = '#059669';
+          } else {
+            this.examSaveCloudStatus.textContent = '💾 Calificación guardada localmente (se sincronizará al conectar)';
+            this.examSaveCloudStatus.style.color = '#D97706';
+          }
+        }
+      }).catch(() => {
+        if (this.examSaveCloudStatus) {
+          this.examSaveCloudStatus.textContent = '💾 Calificación guardada localmente';
+          this.examSaveCloudStatus.style.color = '#D97706';
+        }
+      });
     }
 
     // Configurar oportunidad de reintento si le quedan intentos (< 3)
@@ -899,9 +1181,18 @@ class PolyClayApp {
 
       if (this.isExamMode) {
         this.examQuestionErrors++;
+        let errorReg = { protected: false, effective: true };
+        if (this.evalEngine) {
+          errorReg = this.evalEngine.registerStepError(this.examCurrentQuestionIdx, 'identify', opt.feedback);
+        }
+        this.updateLiveExamStats();
+
         if (this.examQuestionErrors >= 2) {
           // Agotó las oportunidades en esta pregunta del examen
           this.recordExamQuestionResult(false);
+          if (this.evalEngine) {
+            this.evalEngine.registerQuestionCompletion(this.examCurrentQuestionIdx, false, this.originalExpression, this.examQuestionErrors);
+          }
           this.showFeedback(
             false,
             `Pregunta ${this.examCurrentQuestionIdx + 1} no superada`,
@@ -912,7 +1203,10 @@ class PolyClayApp {
           );
           return;
         } else {
-          this.showFeedback(false, '¡Cuidado con la jerarquía!', `${opt.feedback} Tienes una última oportunidad para corregir en esta pregunta.`);
+          const shieldNotice = errorReg.protected
+            ? ' 🛡️ ¡Tu escudo absorbió este error y protegió tu nota!'
+            : ' (-0.2 en tu nota).';
+          this.showFeedback(false, '¡Cuidado con la jerarquía!', `${opt.feedback}${shieldNotice} Tienes una última oportunidad para corregir en esta pregunta.`);
           return;
         }
       }
@@ -1026,8 +1320,17 @@ class PolyClayApp {
 
       if (this.isExamMode) {
         this.examQuestionErrors++;
+        let errorReg = { protected: false, effective: true };
+        if (this.evalEngine) {
+          errorReg = this.evalEngine.registerStepError(this.examCurrentQuestionIdx, 'solve', errorDetail);
+        }
+        this.updateLiveExamStats();
+
         if (this.examQuestionErrors >= 2) {
           this.recordExamQuestionResult(false);
+          if (this.evalEngine) {
+            this.evalEngine.registerQuestionCompletion(this.examCurrentQuestionIdx, false, this.originalExpression, this.examQuestionErrors);
+          }
           this.showFeedback(
             false,
             `Pregunta ${this.examCurrentQuestionIdx + 1} no superada`,
@@ -1038,7 +1341,10 @@ class PolyClayApp {
           );
           return;
         } else {
-          this.showFeedback(false, 'Revisemos la operación', `${errorDetail} Tienes 1 última oportunidad para corregir.`);
+          const shieldNotice = errorReg.protected
+            ? ' 🛡️ ¡Tu escudo absorbió este error y protegió tu nota!'
+            : ' (-0.2 en tu nota).';
+          this.showFeedback(false, 'Revisemos la operación', `${errorDetail}${shieldNotice} Tienes 1 última oportunidad para corregir.`);
           return;
         }
       }
@@ -1096,8 +1402,17 @@ class PolyClayApp {
 
       if (this.isExamMode) {
         this.examQuestionErrors++;
+        let errorReg = { protected: false, effective: true };
+        if (this.evalEngine) {
+          errorReg = this.evalEngine.registerStepError(this.examCurrentQuestionIdx, 'sign_rule', 'Error en ley de signos');
+        }
+        this.updateLiveExamStats();
+
         if (this.examQuestionErrors >= 2) {
           this.recordExamQuestionResult(false);
+          if (this.evalEngine) {
+            this.evalEngine.registerQuestionCompletion(this.examCurrentQuestionIdx, false, this.originalExpression, this.examQuestionErrors);
+          }
           this.showFeedback(
             false,
             `Pregunta ${this.examCurrentQuestionIdx + 1} no superada`,
@@ -1108,10 +1423,13 @@ class PolyClayApp {
           );
           return;
         } else {
+          const shieldNotice = errorReg.protected
+            ? ' 🛡️ ¡Tu escudo absorbió este error y protegió tu nota!'
+            : ' (-0.2 en tu nota).';
           this.showFeedback(
             false,
             '¡Ojo con la ley de signos!',
-            `Recuerda: signos iguales dan más (+), signos contrarios dan menos (-). Tienes una última oportunidad para corregir.`
+            `Recuerda: signos iguales dan más (+), signos contrarios dan menos (-).${shieldNotice} Tienes una última oportunidad para corregir.`
           );
           return;
         }
@@ -1160,6 +1478,9 @@ class PolyClayApp {
 
     if (this.isExamMode) {
       this.recordExamQuestionResult(true);
+      if (this.evalEngine) {
+        this.evalEngine.registerQuestionCompletion(this.examCurrentQuestionIdx, true, this.originalExpression, this.examQuestionErrors);
+      }
 
       this.guideStepTag.textContent = `¡PREGUNTA ${this.examCurrentQuestionIdx + 1} COMPLETADA!`;
       this.guideInstructionText.textContent = `¡Excelente! Respuesta final: ${finalValue}. ¡Acierto sumado para tu nota!`;
@@ -1338,4 +1659,7 @@ class PolyClayApp {
 // Inicializar la aplicación cuando cargue la página
 window.addEventListener('DOMContentLoaded', () => {
   window.app = new PolyClayApp();
+  if (typeof AdminPanel !== 'undefined') {
+    window.adminPanel = new AdminPanel();
+  }
 });

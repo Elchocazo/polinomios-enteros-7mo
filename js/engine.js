@@ -267,36 +267,84 @@ class PolyEngine {
       feedback: `¡Excelente! Según la jerarquía de las operaciones, siempre comenzamos de adentro hacia afuera, resolviendo primero los ${correctBracket.name}s.`
     });
 
-    // 2. Si hay otros signos de agrupación exteriores, agregarlos como distractores realistas
+    // 2. Otros signos de agrupación del mismo o diferente tipo (hermanos o paralelos)
+    const bracketRegex = /(\([^()]+\)|\[[^\[\]]+\]|\{[^{}]+\})/g;
+    let bMatch;
+    while ((bMatch = bracketRegex.exec(expr)) !== null) {
+      if (bMatch.index !== correctBracket.openIdx && bMatch[0] !== correctBracket.fullMatch) {
+        const isSameType = bMatch[0].startsWith(correctBracket.openChar);
+        options.push({
+          text: bMatch[0],
+          type: isSameType ? correctBracket.type : 'other_bracket',
+          name: isSameType ? correctBracket.name : 'Signo exterior',
+          isCorrect: false,
+          tag: isSameType ? `Otro ${correctBracket.name}` : 'Signo exterior',
+          feedback: isSameType 
+            ? `¡Cuidado! Aunque es un ${correctBracket.name}, cuando hay varios al mismo nivel resolvemos de izquierda a derecha.`
+            : `¡Cuidado! Este signo es más exterior. Recuerda: primero paréntesis ( ), luego corchetes [ ], luego llaves { }.`
+        });
+      }
+    }
+
+    // 3. Si hay otros signos de agrupación exteriores más amplios, agregarlos como distractores realistas
     for (const b of this.bracketPairs) {
       if (b.type !== correctBracket.type && expr.includes(b.open)) {
         const start = expr.indexOf(b.open);
         const end = expr.lastIndexOf(b.close);
         if (start !== -1 && end !== -1 && end > start) {
           const sample = expr.substring(start, Math.min(start + 14, end + 1)) + (end > start + 13 ? '...' : '');
-          options.push({
-            text: sample,
-            type: b.type,
-            name: b.name,
-            isCorrect: false,
-            tag: `${b.name} exterior`,
-            feedback: `¡Cuidado! Los ${b.name}s son más exteriores. Recuerda la regla de oro: primero paréntesis ( ), luego corchetes [ ], luego llaves { }.`
-          });
+          if (!options.some(o => o.text === sample)) {
+            options.push({
+              text: sample,
+              type: b.type,
+              name: b.name,
+              isCorrect: false,
+              tag: `${b.name} exterior`,
+              feedback: `¡Cuidado! Los ${b.name}s son más exteriores. Recuerda la regla de oro: primero paréntesis ( ), luego corchetes [ ], luego llaves { }.`
+            });
+          }
         }
       }
     }
 
-    // 3. Distractor de operaciones del inicio o del final
+    // 4. Distractor de operaciones del inicio o del final
     const exteriorMatch = expr.match(/^([+-]?\s*\d+\s*[+-]\s*)/);
     if (exteriorMatch && options.length < 3) {
-      options.push({
-        text: exteriorMatch[0].trim() + ' ...',
-        type: 'exterior',
-        name: 'Operación exterior',
-        isCorrect: false,
-        tag: 'Operación exterior',
-        feedback: `¡Alto ahí! No podemos hacer las operaciones de afuera hasta haber destruido o resuelto los signos de agrupación internos.`
-      });
+      const extText = exteriorMatch[0].trim() + ' ...';
+      if (!options.some(o => o.text === extText)) {
+        options.push({
+          text: extText,
+          type: 'exterior',
+          name: 'Operación exterior',
+          isCorrect: false,
+          tag: 'Operación exterior',
+          feedback: `¡Alto ahí! No podemos hacer las operaciones de afuera hasta haber destruido o resuelto los signos de agrupación internos.`
+        });
+      }
+    }
+
+    // 5. Garantizar siempre al menos 2 opciones
+    if (options.length < 2) {
+      const middleMatch = expr.match(/([+-]\s*\([^()]+\))/);
+      if (middleMatch && !options.some(o => o.text === middleMatch[0].trim())) {
+        options.push({
+          text: middleMatch[0].trim(),
+          type: 'exterior',
+          name: 'Operación intermedia',
+          isCorrect: false,
+          tag: 'Operación con signo',
+          feedback: '¡Cuidado! Primero resolvemos la operación de adentro del paréntesis antes de multiplicar el signo exterior.'
+        });
+      } else {
+        options.push({
+          text: 'Resolver de afuera hacia adentro',
+          type: 'exterior',
+          name: 'Sentido inverso',
+          isCorrect: false,
+          tag: 'Regla inversa',
+          feedback: '¡Cuidado! Las operaciones no se hacen de afuera hacia adentro, sino de adentro hacia afuera.'
+        });
+      }
     }
 
     return options.sort(() => Math.random() - 0.5);

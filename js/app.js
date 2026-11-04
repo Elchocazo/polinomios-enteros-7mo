@@ -343,6 +343,7 @@ class PolyClayApp {
         this.sound.playClick();
         this.customPolyInput.value = e.currentTarget.dataset.example;
       });
+    });
 
     // Cargar ejercicio personalizado
     this.btnLoadCustom.addEventListener('click', () => {
@@ -378,7 +379,6 @@ class PolyClayApp {
         this.processCurrentExpressionState();
       }
     });
-    });
 
     // Teclado en pantalla
     document.querySelectorAll('.key-btn').forEach(btn => {
@@ -394,21 +394,6 @@ class PolyClayApp {
       btn.addEventListener('click', (e) => {
         this.handleSignRuleChoice(e.currentTarget.dataset.sign);
       });
-    });
-
-    // Botón continuar en el banner de feedback
-    this.btnNextStep.addEventListener('click', () => {
-      this.sound.playClick();
-      this.feedbackMessage.classList.add('hidden');
-      if (this.currentStepData && this.currentStepData.type === 'FINISHED') {
-        if (this.isExamMode) {
-          this.advanceExamQuestion();
-        } else {
-          this.advanceToNextExercise();
-        }
-      } else {
-        this.processCurrentExpressionState();
-      }
     });
 
     // Soporte para teclado físico de computadora
@@ -727,6 +712,7 @@ class PolyClayApp {
     this.sound.playSuccess();
 
     this.isExamMode = true;
+    this.isProcessingStep = false;
     this.examCurrentQuestionIdx = 0;
     this.examQuestionErrors = 0;
     this.examAciertos = 0;
@@ -776,8 +762,13 @@ class PolyClayApp {
   }
 
   loadExamQuestion(qIdx) {
+    this.isProcessingStep = false;
     this.examCurrentQuestionIdx = qIdx;
     this.examQuestionErrors = 0;
+    this.inputSign = '';
+    this.inputNum = '';
+    this.updatePreviewDisplay();
+    this.feedbackMessage.classList.add('hidden');
 
     const expr = this.examQuestions[qIdx];
     this.originalExpression = expr;
@@ -797,6 +788,7 @@ class PolyClayApp {
   }
 
   advanceExamQuestion() {
+    this.isProcessingStep = false;
     const nextIdx = this.examCurrentQuestionIdx + 1;
     if (nextIdx < 10) {
       this.loadExamQuestion(nextIdx);
@@ -986,6 +978,7 @@ class PolyClayApp {
 
   exitExamMode() {
     this.isExamMode = false;
+    this.isProcessingStep = false;
     this.examActiveBanner.classList.add('hidden');
     this.renderLevelSelector();
     this.loadExercise(0, 0);
@@ -1197,10 +1190,16 @@ class PolyClayApp {
       this.addScore(100);
       this.increaseStreak();
 
-      this.showFeedback(true, '¡Excelente elección de jerarquía!', opt.feedback, () => {
-        this.isProcessingStep = false;
-        this.startPhaseSolve(step);
-      });
+      this.showFeedback(
+        true,
+        '¡Excelente elección de jerarquía!',
+        opt.feedback,
+        () => {
+          this.isProcessingStep = false;
+          this.startPhaseSolve(step);
+        },
+        'Continuar al Cálculo ➔'
+      );
     } else {
       this.sound.playError();
       this.resetStreak();
@@ -1215,6 +1214,7 @@ class PolyClayApp {
 
         if (this.examQuestionErrors >= 2) {
           // Agotó las oportunidades en esta pregunta del examen
+          this.isProcessingStep = true;
           this.recordExamQuestionResult(false);
           if (this.evalEngine) {
             this.evalEngine.registerQuestionCompletion(this.examCurrentQuestionIdx, false, this.originalExpression, this.examQuestionErrors);
@@ -1224,20 +1224,38 @@ class PolyClayApp {
             `Pregunta ${this.examCurrentQuestionIdx + 1} no superada`,
             `En este examen debíamos resolver primero: ${step.innermost ? step.innermost.name : 'el paréntesis'}. ¡Pasemos a la siguiente pregunta!`,
             () => {
+              this.isProcessingStep = false;
               this.advanceExamQuestion();
-            }
+            },
+            'Siguiente Pregunta ➔'
           );
           return;
         } else {
           const shieldNotice = errorReg.protected
             ? ' 🛡️ ¡Tu escudo absorbió este error y protegió tu nota!'
             : ' (-0.2 en tu nota).';
-          this.showFeedback(false, '¡Cuidado con la jerarquía!', `${opt.feedback}${shieldNotice} Tienes una última oportunidad para corregir en esta pregunta.`);
+          this.showFeedback(
+            false,
+            '¡Cuidado con la jerarquía!',
+            `${opt.feedback}${shieldNotice} Tienes una última oportunidad para corregir en esta pregunta.`,
+            () => {
+              this.isProcessingStep = false;
+            },
+            'Revisar e Intentar de Nuevo ➔'
+          );
           return;
         }
       }
 
-      this.showFeedback(false, '¡Atención a la Jerarquía!', opt.feedback);
+      this.showFeedback(
+        false,
+        '¡Atención a la Jerarquía!',
+        opt.feedback,
+        () => {
+          this.isProcessingStep = false;
+        },
+        'Intentar de Nuevo ➔'
+      );
     }
   }
 
@@ -1296,7 +1314,15 @@ class PolyClayApp {
 
     if (!this.inputNum) {
       this.sound.playError();
-      this.showFeedback(false, 'Ingresa un número', 'Por favor ingresa el valor numérico del resultado antes de comprobar.');
+      this.showFeedback(
+        false,
+        'Ingresa un número',
+        'Por favor ingresa el valor numérico del resultado antes de comprobar.',
+        () => {
+          this.isProcessingStep = false;
+        },
+        'Entendido ➔'
+      );
       return;
     }
 
@@ -1365,6 +1391,7 @@ class PolyClayApp {
         this.updateLiveExamStats();
 
         if (this.examQuestionErrors >= 2) {
+          this.isProcessingStep = true;
           this.recordExamQuestionResult(false);
           if (this.evalEngine) {
             this.evalEngine.registerQuestionCompletion(this.examCurrentQuestionIdx, false, this.originalExpression, this.examQuestionErrors);
@@ -1374,20 +1401,44 @@ class PolyClayApp {
             `Pregunta ${this.examCurrentQuestionIdx + 1} no superada`,
             `El resultado correcto era ${expectedSign === '-' ? '-' : ''}${expectedNum}. ¡Pasemos a la siguiente pregunta!`,
             () => {
+              this.isProcessingStep = false;
               this.advanceExamQuestion();
-            }
+            },
+            'Siguiente Pregunta ➔'
           );
           return;
         } else {
           const shieldNotice = errorReg.protected
             ? ' 🛡️ ¡Tu escudo absorbió este error y protegió tu nota!'
             : ' (-0.2 en tu nota).';
-          this.showFeedback(false, 'Revisemos la operación', `${errorDetail}${shieldNotice} Tienes 1 última oportunidad para corregir.`);
+          this.showFeedback(
+            false,
+            'Revisemos la operación',
+            `${errorDetail}${shieldNotice} Tienes 1 última oportunidad para corregir.`,
+            () => {
+              this.isProcessingStep = false;
+              this.inputSign = '';
+              this.inputNum = '';
+              this.updatePreviewDisplay();
+            },
+            'Revisar e Intentar de Nuevo ➔'
+          );
           return;
         }
       }
 
-      this.showFeedback(false, 'Revisemos la operación', errorDetail);
+      this.showFeedback(
+        false,
+        'Revisemos la operación',
+        errorDetail,
+        () => {
+          this.isProcessingStep = false;
+          this.inputSign = '';
+          this.inputNum = '';
+          this.updatePreviewDisplay();
+        },
+        'Intentar de Nuevo ➔'
+      );
     }
   }
 
@@ -1452,6 +1503,7 @@ class PolyClayApp {
         this.updateLiveExamStats();
 
         if (this.examQuestionErrors >= 2) {
+          this.isProcessingStep = true;
           this.recordExamQuestionResult(false);
           if (this.evalEngine) {
             this.evalEngine.registerQuestionCompletion(this.examCurrentQuestionIdx, false, this.originalExpression, this.examQuestionErrors);
@@ -1461,8 +1513,10 @@ class PolyClayApp {
             `Pregunta ${this.examCurrentQuestionIdx + 1} no superada`,
             `Signos contrarios dan menos (-), signos iguales dan más (+). ¡Pasemos a la siguiente pregunta!`,
             () => {
+              this.isProcessingStep = false;
               this.advanceExamQuestion();
-            }
+            },
+            'Siguiente Pregunta ➔'
           );
           return;
         } else {
@@ -1472,7 +1526,11 @@ class PolyClayApp {
           this.showFeedback(
             false,
             '¡Ojo con la ley de signos!',
-            `Recuerda: signos iguales dan más (+), signos contrarios dan menos (-).${shieldNotice} Tienes una última oportunidad para corregir.`
+            `Recuerda: signos iguales dan más (+), signos contrarios dan menos (-).${shieldNotice} Tienes una última oportunidad para corregir.`,
+            () => {
+              this.isProcessingStep = false;
+            },
+            'Revisar e Intentar de Nuevo ➔'
           );
           return;
         }
@@ -1481,7 +1539,11 @@ class PolyClayApp {
       this.showFeedback(
         false,
         '¡Ojo con la ley de signos!',
-        `Recuerda: signos iguales dan más (+), signos contrarios dan menos (-). En este caso debe ser ${opposingName}.`
+        `Recuerda: signos iguales dan más (+), signos contrarios dan menos (-). En este caso debe ser ${opposingName}.`,
+        () => {
+          this.isProcessingStep = false;
+        },
+        'Intentar de Nuevo ➔'
       );
     }
   }
@@ -1544,8 +1606,10 @@ class PolyClayApp {
         `¡Pregunta ${this.examCurrentQuestionIdx + 1} de 10 Acertada! 🌟`,
         `Has simplificado correctamente todo el polinomio. Continuemos con la siguiente pregunta de tu evaluación.`,
         () => {
+          this.isProcessingStep = false;
           this.advanceExamQuestion();
-        }
+        },
+        'Siguiente Pregunta ➔'
       );
       return;
     }
@@ -1570,8 +1634,10 @@ class PolyClayApp {
       '¡Misión Cumplida, Gran Matemático! 🌟',
       `Has destruido todos los signos de agrupación y aplicado la ley de signos con maestría.`,
       () => {
+        this.isProcessingStep = false;
         this.advanceToNextExercise();
-      }
+      },
+      'Siguiente Ejercicio ➔'
     );
   }
 
@@ -1607,24 +1673,25 @@ class PolyClayApp {
     this.streakCountEl.textContent = this.streak;
   }
 
-  // Mostrar pancarta de feedback
-  showFeedback(isSuccess, heading, detail, nextCallback = null) {
+  // Mostrar pancarta de feedback interactivo con botón de acción garantizado
+  showFeedback(isSuccess, heading, detail, nextCallback = null, btnText = 'Continuar ➔') {
     this.feedbackMessage.className = `feedback-banner ${isSuccess ? '' : 'error'}`;
     this.feedbackIcon.textContent = isSuccess ? '🎉' : '🤔';
     this.feedbackHeading.textContent = heading;
     this.feedbackDetail.textContent = detail;
     this.feedbackMessage.classList.remove('hidden');
 
-    if (nextCallback) {
-      this.btnNextStep.classList.remove('hidden');
-      this.btnNextStep.onclick = () => {
-        this.btnNextStep.onclick = null;
-        this.feedbackMessage.classList.add('hidden');
+    this.btnNextStep.textContent = btnText;
+    this.btnNextStep.classList.remove('hidden');
+    this.btnNextStep.onclick = () => {
+      this.sound.playClick();
+      this.btnNextStep.onclick = null;
+      this.feedbackMessage.classList.add('hidden');
+      this.isProcessingStep = false;
+      if (typeof nextCallback === 'function') {
         nextCallback();
-      };
-    } else {
-      this.btnNextStep.classList.add('hidden');
-    }
+      }
+    };
   }
 
   // Sistema de partículas de confetti

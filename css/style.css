@@ -671,20 +671,21 @@ body {
 }
 
 /* ==========================================================================
-   Área de Interacción del Estudiante (Alineada a la Izquierda)
+   Área de Interacción del Estudiante (Centrado dentro del cuadro blanco)
    ========================================================================== */
 
 .interaction-card {
   background: #FFFFFF;
-  text-align: left;
+  text-align: center;
 }
 
 .interaction-phase {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
-  align-items: flex-start;
-  text-align: left;
+  gap: 1.25rem;
+  align-items: center;
+  text-align: center;
+  width: 100%;
 }
 
 .interaction-phase.hidden {
@@ -693,24 +694,25 @@ body {
 
 .phase-title {
   font-family: 'Fredoka', cursive;
-  font-size: 1.3rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--clay-purple);
-  text-align: left;
+  text-align: center;
 }
 
 .phase-desc {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   color: var(--text-muted);
-  text-align: left;
+  text-align: center;
   font-weight: 600;
 }
 
-/* Opciones de la Fase 1 (Identificar por dónde empezar) */
+/* Opciones de la Fase 1 (Identificar por dónde empezar) - Centradas */
 .options-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
   margin-top: 0.35rem;
   width: 100%;
 }
@@ -718,16 +720,17 @@ body {
 .option-clay-btn {
   background: #FFFFFF;
   border-radius: var(--radius-md);
-  padding: 1.1rem 0.9rem;
+  padding: 1.1rem 1.4rem;
+  min-width: 190px;
   font-family: 'Fredoka', cursive;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: var(--text-dark);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   cursor: pointer;
   border: 3px solid #E2E8F0;
   box-shadow: var(--clay-shadow-out), var(--clay-shadow-inset);
@@ -750,16 +753,16 @@ body {
   text-transform: uppercase;
   color: var(--clay-purple);
   background: var(--clay-purple-bg);
-  padding: 0.2rem 0.55rem;
+  padding: 0.2rem 0.6rem;
   border-radius: var(--radius-full);
 }
 
-/* Fase 2: Resolver la Matemática */
+/* Fase 2: Resolver la Matemática - Centrada */
 .solve-header {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.65rem;
+  align-items: center;
+  gap: 0.75rem;
   width: 100%;
 }
 
@@ -769,20 +772,20 @@ body {
   gap: 0.65rem;
   background: #FEF3C7;
   border: 3px solid #F59E0B;
-  padding: 0.55rem 1.25rem;
+  padding: 0.6rem 1.5rem;
   border-radius: var(--radius-full);
   box-shadow: 4px 4px 12px rgba(245, 158, 11, 0.25), var(--clay-shadow-inset);
 }
 
 .target-label {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: #92400E;
 }
 
 .target-expr {
   font-family: 'Fredoka', cursive;
-  font-size: 1.55rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: #78350F;
 }
@@ -790,27 +793,29 @@ body {
 .student-input-arena {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 1.15rem;
+  align-items: center;
+  gap: 1.25rem;
   width: 100%;
 }
 
 .input-display-clay {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  justify-content: center;
+  gap: 0.9rem;
   background: #F8FAFC;
-  padding: 0.65rem 1.25rem;
+  padding: 0.65rem 1.5rem;
   border-radius: var(--radius-lg);
   box-shadow: var(--clay-shadow-inset-deep);
   border: 2px solid #E2E8F0;
   width: 100%;
-  max-width: 350px;
+  max-width: 360px;
+  margin: 0 auto;
 }
 
 .prompt-symbol {
   font-family: 'Fredoka', cursive;
-  font-size: 1.3rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--text-muted);
 }
@@ -840,16 +845,17 @@ body {
   color: var(--text-dark);
 }
 
-/* Teclado Numérico estilo Computador (PC Numpad Layout) */
+/* Teclado Numérico estilo Computador (PC Numpad Layout) - Centrado */
 .clay-keypad {
   width: 100%;
-  max-width: 350px;
+  max-width: 360px;
+  margin: 0 auto;
 }
 
 .keypad-pc-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.6rem;
+  gap: 0.65rem;
   width: 100%;
 }
 
@@ -897,12 +903,12 @@ body {
   font-size: 1.05rem;
 }
 
-/* Fase 3: Regla de Signos / Doble signo */
+/* Fase 3: Regla de Signos / Doble signo - Centrada */
 .sign-rule-arena {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 1.15rem;
+  align-items: center;
+  gap: 1.25rem;
   width: 100%;
 }
 
@@ -918,6 +924,7 @@ body {
   font-family: 'Fredoka', cursive;
   font-size: 1.55rem;
   font-weight: 700;
+  margin: 0 auto;
 }
 
 .old-signs {
@@ -936,9 +943,10 @@ body {
 
 .sign-options-row {
   display: flex;
-  gap: 0.85rem;
+  gap: 1rem;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: center;
+  width: 100%;
 }
 
 .clay-btn-sign {

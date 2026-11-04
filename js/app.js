@@ -366,13 +366,18 @@ class PolyClayApp {
       this.startCustomExercise(generated, `Ejercicio Generado (${CURRICULUM_LEVELS[this.currentLevelIdx].name})`);
     });
 
-    // Reiniciar ejercicio
+    // Reiniciar ejercicio (en práctica genera un ejercicio nuevo y diferente)
     this.btnResetCurrent.addEventListener('click', () => {
       this.sound.playClick();
-      this.currentExpression = this.originalExpression;
-      this.stepsHistory = [];
-      this.updateStepsHistoryDisplay();
-      this.processCurrentExpressionState();
+      if (!this.isExamMode) {
+        this.loadExercise(this.currentLevelIdx, this.currentExerciseIdx);
+      } else {
+        this.currentExpression = this.originalExpression;
+        this.stepsHistory = [];
+        this.updateStepsHistoryDisplay();
+        this.processCurrentExpressionState();
+      }
+    });
     });
 
     // Teclado en pantalla
@@ -476,9 +481,17 @@ class PolyClayApp {
 
     this.currentLevelIdx = levelIdx;
     const level = CURRICULUM_LEVELS[levelIdx];
-    this.currentExerciseIdx = exerciseIdx % level.exercises.length;
+    this.currentExerciseIdx = exerciseIdx % (level.exercises.length || 5);
 
-    const expr = level.exercises[this.currentExerciseIdx];
+    // Generar SIEMPRE un ejercicio nuevo, dinámico y único cada vez que se entra o avanza
+    let expr = '';
+    if (typeof PolynomialGenerator !== 'undefined' && PolynomialGenerator.generate) {
+      expr = PolynomialGenerator.generate(level.id);
+      level.exercises[this.currentExerciseIdx] = expr;
+    } else {
+      expr = level.exercises[this.currentExerciseIdx] || '8 - (-3 + 5)';
+    }
+
     this.originalExpression = expr;
     this.currentExpression = expr;
     this.stepsHistory = [];

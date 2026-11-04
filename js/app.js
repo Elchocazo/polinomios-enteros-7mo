@@ -342,7 +342,6 @@ class PolyClayApp {
         this.sound.playClick();
         this.customPolyInput.value = e.currentTarget.dataset.example;
       });
-    });
 
     // Cargar ejercicio personalizado
     this.btnLoadCustom.addEventListener('click', () => {
@@ -1678,6 +1677,13 @@ class PolyClayApp {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
   }
+}
+
+if (typeof window !== 'undefined') {
+  window.PolyClayApp = PolyClayApp;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = PolyClayApp;
 }
 
 // Inicializar la aplicación cuando cargue la página
